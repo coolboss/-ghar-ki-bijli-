@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Ghar Ki Bijli Flow</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&amp;family=Source+Sans+3:ital,wght@0,400;0,600;1,400&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap">
+<style>
+:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+img{max-width:100%}
+
+/* Layout: one long guided page, sticky section tabs, each section a "panel" like a page from a wireman's manual. Accent = safety orange (hard-hat), neutrals biased blue-grey like galvanised steel. */
+:root{
+  --bg:#f3f4f6; --panel:#ffffff; --panel2:#e9ecf1; --line:#c9cfd8;
+  --fg:#1b2129; --muted:#5b6673;
+  --accent:#e8711a; --accent-ink:#ffffff; --accent-soft:#fde6d4;
+  --good:#1f8a4c; --warn:#c98a00; --bad:#c92a2a;
+  --display:"Barlow Condensed","Arial Narrow",Impact,sans-serif;
+  --body:"Source Sans 3","Segoe UI",Roboto,sans-serif;
+  --mono:"JetBrains Mono",Menlo,Consolas,monospace;
+  /* exact wire colours (BIS / IEC) — never themed */
+  --w-red:#e10600; --w-yellow:#ffd500; --w-blue:#0047bb; --w-black:#111111; --w-green:#0a8f2c; --w-brown:#6b3a1e; --w-lblue:#5aa9ff; --w-grey:#8e8e8e;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#13171c; --panel:#1b2027; --panel2:#232a33; --line:#38424e;
+  --fg:#e9edf1; --muted:#9aa6b3; --accent:#ff8a3d; --accent-ink:#1b1206; --accent-soft:#3a2516;
+  --good:#3ccc78; --warn:#ffc233; --bad:#ff6b6b; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#13171c; --panel:#1b2027; --panel2:#232a33; --line:#38424e;
+  --fg:#e9edf1; --muted:#9aa6b3; --accent:#ff8a3d; --accent-ink:#1b1206; --accent-soft:#3a2516;
+  --good:#3ccc78; --warn:#ffc233; --bad:#ff6b6b; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:17px;line-height:1.55;margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:980px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 60px}
+h1,h2,h3,h4{font-family:var(--display);line-height:1.05;text-wrap:balance;margin:0}
+h1{font-size:clamp(44px,9vw,84px);font-weight:700;letter-spacing:-.01em}
+h2{font-size:clamp(30px,5vw,44px);font-weight:700}
+h3{font-size:24px;font-weight:600}
+h4{font-size:19px;font-weight:600}
+p{margin:0}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600}
+.lead{font-size:20px;color:var(--muted);max-width:62ch}
+.muted{color:var(--muted)}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+a{color:var(--accent)}
+
+/* hero */
+.hero{padding-block:40px 28px;display:grid;gap:14px;border-bottom:4px solid var(--accent)}
+.hero .tag{display:inline-flex;gap:8px;align-items:center;font-family:var(--mono);font-size:12px;color:var(--muted)}
+.hero .tag b{color:var(--fg)}
+.wirebar{display:flex;height:10px;border-radius:5px;overflow:hidden;max-width:420px}
+.wirebar i{flex:1}
+
+/* nav */
+nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--bg);border-bottom:1px solid var(--line);margin-left:calc(-1*max(16px,env(safe-area-inset-left,0px)));margin-right:calc(-1*max(16px,env(safe-area-inset-right,0px)));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+nav.tabs ul{list-style:none;margin:0;padding:0;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+nav.tabs li a{display:block;white-space:nowrap;padding:12px 12px;font-family:var(--display);font-size:17px;font-weight:600;text-decoration:none;color:var(--muted);border-bottom:3px solid transparent}
+nav.tabs li a.on,nav.tabs li a:hover{color:var(--fg);border-color:var(--accent)}
+
+section.step{padding-block:44px 8px;display:grid;gap:18px;scroll-margin-top:70px}
+section.step+section.step{border-top:1px dashed var(--line);margin-top:28px}
+.stepnum{font-family:var(--display);font-size:14px;letter-spacing:.1em;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.grid2>*,.grid3>*{min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:16px;display:grid;gap:8px;align-content:start}
+.card.flat{background:var(--panel2);border:none}
+.note{border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 14px;border-radius:0 6px 6px 0;display:grid;gap:4px}
+.danger{border-left-color:var(--bad)}
+.ok{border-left-color:var(--good)}
+ul.tight{margin:0;padding-left:20px;display:grid;gap:5px}
+ol.tight{margin:0;padding-left:22px;display:grid;gap:6px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--display);font-size:16px;letter-spacing:.03em}
+.tscroll{overflow-x:auto}
+button,.btn{font-family:var(--display);font-size:17px;font-weight:600;letter-spacing:.02em;border:1px solid var(--line);background:var(--panel);color:var(--fg);padding:9px 14px;border-radius:4px;cursor:pointer}
+button.pri{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+button.on{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+input[type=text],input[type=number],select,textarea{font:inherit;color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:8px 10px;width:100%}
+label.f{display:grid;gap:4px;font-size:14px;color:var(--muted)}
+.big{font-family:var(--display);font-size:40px;line-height:1;font-weight:700;font-variant-numeric:tabular-nums}
+.pill{display:inline-block;font-family:var(--mono);font-size:12px;padding:2px 8px;border-radius:999px;background:var(--panel2);color:var(--fg)}
+.pill.good{background:var(--good);color:#fff}.pill.bad{background:var(--bad);color:#fff}.pill.warn{background:var(--warn);color:#1b1206}
+
+/* journey */
+.journey{display:grid;gap:0}
+.jstage{display:grid;grid-template-columns:54px 1fr;gap:14px;position:relative;padding-block:10px 22px}
+.jstage .kv{font-family:var(--display);font-size:22px;font-weight:700;background:var(--fg);color:var(--bg);border-radius:4px;height:54px;display:grid;place-items:center;text-align:center;line-height:1;padding:4px;font-size:15px}
+.jstage::before{content:"";position:absolute;left:26px;top:64px;bottom:-2px;width:3px;background:var(--line)}
+.jstage:last-child::before{display:none}
+.jstage .body{display:grid;gap:6px;min-width:0}
+.jstage summary{cursor:pointer;font-family:var(--display);font-size:22px;font-weight:600;list-style:none}
+.jstage summary::after{content:" +";color:var(--accent)}
+.jstage details[open] summary::after{content:" –"}
+.jstage details>div{display:grid;gap:8px;padding-top:8px}
+
+/* wire swatches */
+.wires{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.wire{background:var(--panel);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.wire .sw{height:54px;position:relative}
+.wire .sw.gy{background:repeating-linear-gradient(135deg,var(--w-green) 0 14px,var(--w-yellow) 14px 28px)}
+.wire .sw::after{content:"";position:absolute;left:12px;right:12px;top:22px;height:10px;background:#c9742a;border-radius:5px;opacity:.9}
+.wire .tx{padding:10px 12px;display:grid;gap:2px}
+.wire .tx b{font-family:var(--display);font-size:19px}
+.wire .tx small{color:var(--muted);font-size:13px}
+.wire .hex{font-family:var(--mono);font-size:12px}
+
+/* canvas */
+canvas{width:100%;height:auto;display:block;background:var(--panel);border:1px solid var(--line);border-radius:6px}
+
+/* DB diagram */
+.db{background:var(--panel2);border:3px solid var(--fg);border-radius:8px;padding:14px;display:grid;gap:10px}
+.dbrow{display:flex;gap:8px;flex-wrap:wrap}
+.dev{flex:1 1 70px;min-width:62px;border:2px solid var(--fg);background:var(--panel);border-radius:4px;padding:8px 6px;text-align:center;cursor:pointer;display:grid;gap:3px;font-family:var(--display);font-size:15px;font-weight:600;line-height:1.1}
+.dev small{font-family:var(--mono);font-size:11px;color:var(--muted);font-weight:400}
+.dev .lever{width:14px;height:22px;margin:0 auto;border-radius:3px;background:var(--good)}
+.dev.off .lever{background:var(--bad)}
+.dev.sel{outline:3px solid var(--accent)}
+.dev.wide{flex:2 1 120px}
+.busbar{height:8px;border-radius:4px;background:var(--w-red)}
+.busbar.n{background:var(--w-black)}.busbar.e{background:repeating-linear-gradient(90deg,var(--w-green) 0 20px,var(--w-yellow) 20px 30px)}
+.busl{font-family:var(--mono);font-size:11px;color:var(--muted)}
+
+/* room list */
+.rooms{display:flex;flex-wrap:wrap;gap:6px}
+.circ{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.circ .cw{width:18px;height:18px;border-radius:3px;border:1px solid rgba(0,0,0,.2)}
+.circ b{font-family:var(--display);font-size:18px}
+.circ small{display:block;color:var(--muted);font-family:var(--mono);font-size:12px}
+
+/* quiz */
+.q{display:grid;gap:8px}
+.q .opts{display:grid;gap:6px}
+.q .opts button{text-align:left;font-family:var(--body);font-weight:400;font-size:16px}
+.q .opts button.right{border-color:var(--good);background:color-mix(in srgb,var(--good) 15%,var(--panel))}
+.q .opts button.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 15%,var(--panel))}
+.qr-out{display:grid;place-items:center;background:#fff;padding:14px;border-radius:6px;border:1px solid var(--line);min-height:200px}
+.qr-out img,.qr-out canvas{max-width:100%}
+svg text{font-family:var(--mono);font-size:11px;fill:var(--fg)}
+svg .lbl{font-family:var(--display);font-size:15px;font-weight:600}
+.sock{max-width:260px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ---------- flow layout ---------- */
+:root{--accent-text:#a84a08;--good-text:#17753f}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){--accent-text:#ff8a3d;--good-text:#3ccc78} }
+:root[data-theme="dark"]{--accent-text:#ff8a3d;--good-text:#3ccc78}
+[hidden]{display:none!important}
+.wrap{max-width:1180px}
+.eyebrow,a{color:var(--accent-text)}
+.hero{padding-block:24px 16px;gap:8px}
+h1{font-size:clamp(40px,6vw,56px)}
+.grid2{grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr))}
+.grid3{grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr))}
+.wires{grid-template-columns:repeat(auto-fit,minmax(min(150px,100%),1fr))}
+nav.tabs li a{padding:13px 16px;font-size:19px}
+button:disabled{opacity:.45;cursor:default}
+.view{display:grid;gap:18px;padding-top:22px}
+.view>*{min-width:0}
+.view>section.step{padding-block:8px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips button{min-height:44px}
+.readout{display:flex;flex-wrap:wrap;gap:12px 28px;align-items:center}
+.rdnums{flex-wrap:nowrap}
+.rdtext{flex:1 1 420px;min-width:0;display:grid;gap:4px}
+.rdtext p{max-width:80ch}
+.small{font-size:14px}
+.foot{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);display:grid;gap:10px}
+.foot .tag{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.foot .tag b{color:var(--fg)}
+@media (max-width:599px){
+  .hero{padding-block:18px 14px}
+  .hero .lead,.rdnums{display:none}
+  .view{gap:14px;padding-top:16px}
+}
+
+.flow{display:grid;gap:8px;min-width:0}
+.stage{appearance:none;background:none;border:0;padding:0;margin:0;font:inherit;letter-spacing:0;color:inherit;text-align:left;cursor:pointer;border-radius:6px;display:grid;grid-template-columns:20px minmax(0,1fr);gap:8px;min-width:0;scroll-margin-top:64px}
+.lane{display:flex;justify-content:center;margin-block:-4px}
+.stage:first-child .lane{margin-top:0}
+.stage:last-of-type .lane{margin-bottom:0}
+.lane i{display:block;width:var(--t,3px);background:var(--c,var(--w-red));transition:width .25s,height .25s,background-color .25s}
+.lane.taper i{clip-path:polygon(calc(50% - 1.5px) 0,calc(50% + 1.5px) 0,100% 100%,0 100%)}
+.scard{display:grid;grid-template-columns:84px minmax(0,1fr);column-gap:10px;row-gap:4px;align-items:start;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px;min-width:0}
+.scard .kv{grid-row:1 / span 4;display:grid;place-items:center;min-height:44px;padding:4px 6px;background:var(--fg);color:var(--bg);border-radius:4px;font-family:var(--display);font-size:15px;font-weight:700;line-height:1.05;text-align:center}
+.scard .sname{font-family:var(--display);font-size:22px;font-weight:600;line-height:1.05;overflow-wrap:anywhere}
+.scard .sval{font-family:var(--mono);font-size:12px;line-height:1.35;color:var(--muted)}
+.scard .pill{justify-self:start;border-radius:10px}
+.scard .more{font-family:var(--display);font-size:17px;font-weight:600;color:var(--accent-text)}
+.scard .more::after{content:" +"}
+.stage[aria-expanded="true"] .more::after{content:" –"}
+.clist{display:grid;gap:6px}
+.clist .cl{text-align:left;font-family:var(--body);font-weight:400;font-size:16px;min-height:44px}
+@media (max-width:599px){ nav.tabs li a{padding-inline:12px} }
+.stage[aria-expanded="true"] .scard{box-shadow:0 0 0 3px var(--accent)}
+.pill.live{background:color-mix(in srgb,var(--good) 16%,var(--panel));color:var(--good-text)}
+.pill.trip{background:var(--bad);color:var(--panel)}
+.pill.where{background:var(--warn);color:#1b1206}
+.pill.dead{background:var(--panel2);color:var(--muted)}
+
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:14px 12px;display:grid;gap:14px;min-width:0;scroll-margin-top:64px}
+.flow>.panel{margin-block:2px 6px}
+.spanel{display:grid;gap:10px;min-width:0}
+.spanel h2{font-size:clamp(28px,4vw,38px)}
+.chaps{display:grid;gap:8px;min-width:0}
+details.chap{border:1px solid var(--line);border-radius:6px;background:var(--bg);min-width:0;scroll-margin-top:64px}
+details.chap>summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:44px;padding:8px 14px;font-family:var(--display);font-size:20px;font-weight:600;line-height:1.15}
+details.chap>summary::-webkit-details-marker{display:none}
+details.chap>summary::after{content:"+";color:var(--accent-text);font-weight:700;font-size:24px;line-height:1}
+details.chap[open]>summary::after{content:"–"}
+details.chap[open]>summary{border-bottom:1px solid var(--line)}
+details.chap>summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.cb{padding:14px 12px 16px;display:grid;gap:18px;min-width:0}
+.cb>*{min-width:0}
+.pnav{justify-content:space-between}
+
+@media (min-width:1000px){
+  .flow{grid-template-columns:repeat(7,minmax(0,1fr));gap:12px}
+  .stage{grid-template-columns:none;grid-template-rows:28px 1fr;gap:6px}
+  .lane{margin-block:0;margin-inline:-6px;align-items:center;justify-content:stretch}
+  .stage:first-child .lane{margin-left:0}
+  .stage:last-of-type .lane{margin-right:0}
+  .lane i{width:100%;height:var(--t,3px)}
+  .lane.taper i{clip-path:polygon(0 calc(50% - 1.5px),100% 0,100% 100%,0 calc(50% + 1.5px))}
+  .scard{grid-template-columns:minmax(0,1fr);row-gap:8px;padding:12px;align-content:start;box-sizing:border-box;height:100%}
+  .scard .kv{grid-row:auto}
+  .panel{padding:20px}
+  .cb{padding:18px 16px 20px}
+  .hero{grid-template-columns:auto minmax(0,1fr);column-gap:32px;align-items:end}
+  .hero .eyebrow{grid-column:1 / -1}
+  .hero .lead{padding-bottom:8px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <span class="eyebrow">MGVCL substation → your bedroom switchboard</span>
+  <h1>Ghar Ki Bijli</h1>
+  <p class="lead">Follow electricity from the substation to your socket. Switch something on, break something, and tap any stage to open it.</p>
+</header>
+
+<nav class="tabs" aria-label="Views"><ul>
+  <li><a href="#flow" class="on" aria-current="page">Flow</a></li>
+  <li><a href="#chapters">Chapters</a></li>
+  <li><a href="#passport">Passport</a></li>
+  <li><a href="#exam">Exam</a></li>
+</ul></nav>
+
+<main>
+<div class="view" id="view-flow">
+  <div class="grid2">
+    <div class="card"><span class="eyebrow">1 · Switch something on</span><div class="chips" id="apps" role="group" aria-label="Appliance"></div></div>
+    <div class="card"><span class="eyebrow">2 · Break something</span><div class="chips" id="flts" role="group" aria-label="Fault"></div></div>
+  </div>
+  <div class="card readout">
+    <div class="row rdnums" style="gap:28px">
+      <div><div class="muted">In your wall, 230 V</div><div class="big" id="rdWall">8.7 A</div></div>
+      <div><div class="muted">On the 11 kV feeder</div><div class="big" id="rdFeed">0.18 A</div></div>
+    </div>
+    <div class="rdtext">
+      <p id="rdSum" aria-live="polite"></p>
+      <p class="muted small">Currents are simplified: watts ÷ volts, with losses and power factor ignored.</p>
+    </div>
+  </div>
+  <p class="muted" id="flowtop" style="scroll-margin-top:64px">Tap a stage to open its chapters. The wire is thicker where your appliance draws more current. Red is live, grey is dead.</p>
+  <div class="flow">
+<button type="button" class="stage" aria-expanded="false" aria-controls="panel"><span class="lane" aria-hidden="true"><i></i></span><span class="scard"><span class="kv">66 kV → 11 kV</span><span class="sname">1 · Substation</span><span class="sval"></span><span class="pill live">live</span><span class="more">3 chapters</span></span></button>
+<button type="button" class="stage" aria-expanded="false" aria-controls="panel"><span class="lane taper" aria-hidden="true"><i></i></span><span class="scard"><span class="kv">11 kV → 433 V</span><span class="sname">2 · Transformer</span><span class="sval"></span><span class="pill live">live</span><span class="more">1 chapter</span></span></button>
+<button type="button" class="stage" aria-expanded="false" aria-controls="panel"><span class="lane" aria-hidden="true"><i></i></span><span class="scard"><span class="kv">415 V · 3Ø + N</span><span class="sname">3 · Street line</span><span class="sval"></span><span class="pill live">live</span><span class="more">2 chapters</span></span></button>
+<button type="button" class="stage" aria-expanded="false" aria-controls="panel"><span class="lane" aria-hidden="true"><i></i></span><span class="scard"><span class="kv">230 V · 1Ø + N</span><span class="sname">4 · Meter</span><span class="sval"></span><span class="pill live">live</span><span class="more">3 chapters</span></span></button>
+<button type="button" class="stage" aria-expanded="false" aria-controls="panel"><span class="lane" aria-hidden="true"><i></i></span><span class="scard"><span class="kv">MAIN · RCCB · MCB</span><span class="sname">5 · Board</span><span class="sval"></span><span class="pill live">live</span><span class="more">5 chapters</span></span></button>
+<button type="button" class="stage" aria-expanded="false" aria-controls="panel"><span class="lane" aria-hidden="true"><i></i></span><span class="scard"><span class="kv">RED · BLACK · GREEN</span><span class="sname">6 · Wall</span><span class="sval"></span><span class="pill live">live</span><span class="more">2 chapters</span></span></button>
+<button type="button" class="stage" aria-expanded="false" aria-controls="panel"><span class="lane" aria-hidden="true"><i></i></span><span class="scard"><span class="kv">SOCKET · SWITCH</span><span class="sname">7 · Room</span><span class="sval"></span><span class="pill live">live</span><span class="more">2 chapters</span></span></button>
+  </div>
+  <div id="pslot"></div>
+  <div class="panel" id="panel" hidden>
+<div class="spanel" hidden>
+<span class="eyebrow">Stage 1 of 7 · 66 kV → 11 kV</span>
+<h2>MGVCL substation</h2>
+<p class="lead">Gujarat splits electricity into three businesses: GSECL and private plants <b>generate</b>, GETCO <b>transmits</b> at high voltage, and MGVCL <b>distributes</b> it to Vadodara and nine other districts. Your MGVCL substation steps 66 kV down to 11 kV and sends it out on feeders.</p>
+<span class="eyebrow">Open for detail</span>
+<div class="chaps">
+<details class="chap" id="c-j0"><summary>Generation and transmission (GETCO)</summary><div class="cb"><p>Thermal, gas, solar and wind plants produce at 11 to 21 kV. A generator transformer steps this up to 220 or 400 kV. Higher voltage means lower current for the same power, and losses in a wire grow with the <i>square</i> of current, so long lines run at the highest practical voltage. GETCO towers carry it across the state.</p></div></details>
+<details class="chap" id="c-j1"><summary>Grid substation, 220/66 kV</summary><div class="cb"><p>Large outdoor yards with the big grey transformers you see near the highway. GETCO hands over to MGVCL at the 66 kV level.</p></div></details>
+<details class="chap" id="c-j2"><summary>MGVCL substation, 66/11 kV (your "sub-station")</summary><div class="cb"><p>This is the one near Gotri, Harni or Akota that your bill refers to. Two or three power transformers step 66 kV down to 11 kV. From here several <b>11 kV feeders</b> leave, each a named cable or overhead line serving a few thousand consumers. A feeder breaker trips here when a tree falls on a line, which is why a whole area loses power at once.</p><p>MGVCL complaint numbers quote your <b>feeder name</b> and <b>DT (distribution transformer) number</b>. Both are worth writing down for your house.</p></div></details>
+</div>
+</div>
+<div class="spanel" hidden>
+<span class="eyebrow">Stage 2 of 7 · 11 kV → 433 V</span>
+<h2>Distribution transformer on the pole</h2>
+<p class="lead">The drum on the two-pole structure in your lane. 11 kV goes in; three phases and a neutral come out at 433 V. The neutral is earthed here, which is why it sits near 0 V.</p>
+<span class="eyebrow">Open for detail</span>
+<div class="chaps">
+<details class="chap" id="c-j3"><summary>Distribution transformer (DT) on the pole or plinth</summary><div class="cb"><p>The green or grey drum on a two-pole structure near your lane, typically 63, 100, 200 or 315 kVA. Its primary takes 11 kV from the feeder; its secondary gives <b>three phases + neutral at 433 V</b> (nominally 415 V after a little drop). The neutral is <b>earthed here</b> with a buried electrode; that earth is what makes your neutral sit at 0 V.</p><p>A DT serves 50 to 300 homes. Overloaded DTs are the reason voltage dips to 200 V on summer evenings when every AC in the lane starts.</p></div></details>
+</div>
+</div>
+<div class="spanel" hidden>
+<span class="eyebrow">Stage 3 of 7 · 415 V · 3Ø + N</span>
+<h2>LT line along the street</h2>
+<p class="lead">Four conductors run past your gate: R, Y, B and neutral. Any phase to neutral is 230 V; phase to phase is 415 V. Your house taps one phase, or all three.</p>
+<span class="eyebrow">Open for detail</span>
+<div class="chaps">
+<details class="chap" id="c-j4"><summary>LT line (low tension) along the street</summary><div class="cb"><p>Four bare or insulated conductors on the poles outside your gate: R, Y, B and neutral. In newer colonies this is an <b>aerial bunched cable</b> (black twisted bundle) or an underground armoured cable with a green feeder pillar box on the footpath. Street lights hang off one phase of this line.</p></div></details>
+<details class="chap" id="c-phases"><summary>Single phase vs three phase</summary><div class="cb" id="phases">
+  
+  
+  <p class="lead">The generator at the power station makes three alternating voltages at once, each shifted by one-third of a cycle. These are the R, Y and B phases. Every home gets one of them, or all three.</p>
+  <div class="row"><button class="on" id="b1ph">Single phase (1 wire + neutral)</button><button id="b3ph">Three phase (3 wires + neutral)</button></div>
+  <canvas id="wave" width="900" height="300" aria-label="Sine wave animation"></canvas>
+  <div class="grid2">
+    <div class="card"><h3>Single phase · 230 V</h3><ul class="tight"><li>Two wires from the pole: one phase (red) and neutral (black), plus your own earth.</li><li>Usually sanctioned up to about <b>5 kW</b> by MGVCL. Enough for lights, fans, fridge, TV, one or two ACs and a geyser if not all run together.</li><li>Single-phase meter, double-pole main MCB.</li><li>The voltage between phase and neutral is 230 V.</li></ul></div>
+    <div class="card"><h3>Three phase · 415 V</h3><ul class="tight"><li>Four wires from the pole: R, Y, B phases and neutral. Each phase to neutral is still 230 V; phase to phase is 415 V (230 × √3).</li><li>Needed when sanctioned load is larger (bungalow with 3 to 4 ACs, lift, submersible pump, a clinic). Three-phase meter and a four-pole main switch.</li><li>The electrician <b>balances</b> the house: ground-floor rooms on R, first floor on Y, kitchen and ACs on B, so each phase carries a similar load.</li><li>If one phase fails at the substation, only one-third of your house goes dark. That is the usual reason "half the colony has power".</li></ul></div>
+  </div>
+  <div class="note"><b>Why the neutral matters in three phase.</b> When the three phases are balanced, their currents cancel and the neutral carries almost nothing. If the neutral wire breaks (a loose joint at the pole or a corroded lug in your meter box), the phases are no longer anchored to 0 V: a lightly loaded phase can rise toward 415 V and burn every appliance on it. Electricians call this a <b>neutral float</b>. It is the single most common cause of "all my electronics died at once".</div>
+</div></details>
+</div>
+</div>
+<div class="spanel" hidden>
+<span class="eyebrow">Stage 4 of 7 · 230 V · 1Ø + N</span>
+<h2>Service cable and meter</h2>
+<p class="lead">The service cable brings one phase and the neutral to your meter. Everything up to and including the meter belongs to MGVCL. Everything after it is yours.</p>
+<span class="eyebrow">Open for detail</span>
+<div class="chaps">
+<details class="chap" id="c-j5"><summary>Service connection to your house</summary><div class="cb"><p>MGVCL's lineman taps one phase (or all three) and the neutral and runs a <b>service cable</b> to your building: usually a 2-core or 4-core aluminium or copper cable, 10 to 25 mm². Everything up to and including the meter belongs to MGVCL; everything after the meter is yours.</p></div></details>
+<details class="chap" id="c-j6"><summary>Energy meter (increasingly a smart prepaid meter)</summary><div class="cb"><p>Counts kWh. A single-phase meter has 4 terminals: phase in, phase out, neutral in, neutral out. The three-phase meter has 8. It is sealed; opening the seal is an offence. MGVCL's smart meters report readings over a radio network and can be prepaid.</p><p>Right after the meter MGVCL usually fits a <b>cut-out</b> or a small MCB sized to your sanctioned load. Pull more than the sanction and it trips, which is your prompt to apply for load enhancement.</p></div></details>
+<details class="chap" id="c-meter"><summary>Smart meters: when the bill goes up</summary><div class="cb" id="meter">
+  
+  
+  <p class="lead">MGVCL is replacing old meters with prepaid smart meters. The first bill afterwards is often higher, and the meter gets blamed. Separate two questions before you complain: did the <b>units</b> change, or only the <b>rupees</b>?</p>
+  <div class="grid2">
+    <div class="card"><h4>Case A · units similar, rupees higher</h4><p>Old meter 420 kWh, new meter 425 kWh, bill much higher. The meter is not the story. Look at the fixed charge, a tariff slab change, time-of-day rates, arrears carried from estimated bills, or a security deposit adjustment. Read the bill line by line.</p></div>
+    <div class="card"><h4>Case B · units jumped, usage unchanged</h4><p>Old meter 420 kWh, new meter 650 kWh, same appliances. Now metrology, wiring or a neighbour's load on your meter deserve a real test. Old electromechanical meters often <i>under</i>-recorded for years, so the new one may be the honest one, but check.</p></div>
+  </div>
+  <div class="card">
+    <span class="eyebrow">Known-load test · do it yourself in 30 minutes</span>
+    <ol class="tight">
+      <li>Write down the meter reading (kWh, to three decimals on a smart meter) and the time.</li>
+      <li>Switch off every circuit MCB. The reading should stop moving. If it still climbs, something is wired before your board, or the meter is wrong.</li>
+      <li>Switch on one known resistive load: a 2 kW geyser or a 1.5 kW room heater. Run it exactly 30 minutes. Expected: 1.0 kWh for 2 kW.</li>
+      <li>Compare. Meters are allowed about ± 1 to 2 % error (Class 1). A 10 % difference is a complaint; a 2 % difference is not.</li>
+    </ol>
+    <div class="grid3">
+      <label class="f">Load (watts)<input type="number" id="mtW" value="2000"></label>
+      <label class="f">Minutes run<input type="number" id="mtM" value="30"></label>
+      <label class="f">Meter moved by (kWh)<input type="number" id="mtK" value="1.02" step="0.001"></label>
+    </div>
+    <div class="row" style="gap:28px"><div><div class="muted">Expected</div><div class="big" id="mtE">1.000 kWh</div></div><div><div class="muted">Meter error</div><div class="big" id="mtErr">+2.0 %</div></div><div><span class="pill" id="mtV">within Class 1 tolerance</span></div></div>
+    <p class="muted">Better still: borrow a plug-in energy monitor and compare its kWh over a day with the meter's interval data from the MGVCL app. Only after the units reconcile does it make sense to rebuild the rupee bill from tariff, fixed charge, duty and adjustments.</p>
+  </div>
+</div></details>
+</div>
+</div>
+<div class="spanel" hidden>
+<span class="eyebrow">Stage 5 of 7 · MAIN · RCCB · MCB</span>
+<h2>Distribution board</h2>
+<p class="lead">Current passes the main switch, then the RCCB, then one MCB for each circuit. The MCB protects the wire from fire. The RCCB protects people from shock.</p>
+<span class="eyebrow">Open for detail</span>
+<div class="chaps">
+<details class="chap" id="c-j7"><summary>Your side begins: main isolator and distribution board</summary><div class="cb"><p>From the meter, your own cable (6 or 10 mm² copper for single phase) runs to the <b>distribution board</b> (DB) inside the house. The chapters below open the board up.</p></div></details>
+<details class="chap" id="c-protection"><summary>MCB, RCCB, ELCB, RCBO, MCCB: who protects whom</summary><div class="cb" id="protection">
+  
+  
+  <p class="lead">Each device watches for one kind of trouble. A house with only MCBs is protected against fire but not against electrocution. Learn the three faults first, then the devices.</p>
+  <div class="grid3">
+    <div class="card flat"><span class="eyebrow">Fault 1</span><h4>Overload</h4><p>Too many appliances on one wire. The current creeps above what the wire can carry. The wire warms, the insulation softens, and over minutes it can start a fire inside the wall.</p></div>
+    <div class="card flat"><span class="eyebrow">Fault 2</span><h4>Short circuit</h4><p>Live touches neutral directly: a nail through a cable, a burnt plug. The current jumps to hundreds or thousands of amperes in milliseconds. A flash, a bang, melted copper.</p></div>
+    <div class="card flat"><span class="eyebrow">Fault 3</span><h4>Earth leakage</h4><p>Current escapes to earth through something it should not: the body of a geyser, wet fingers, a child's hand. Only 30 mA (0.03 A) across the heart can be fatal. An MCB rated 16 A will never notice it.</p></div>
+  </div>
+  <div class="card">
+    <span class="eyebrow">Fault simulator · which device trips?</span>
+    <div class="row">
+      <button class="fs" data-f="ol">Geyser + AC + iron on one 16 A line</button>
+      <button class="fs" data-f="sc">Nail through a cable</button>
+      <button class="fs" data-f="el">Wet hand touches a live tap</button>
+      <button class="fs" data-f="ok">Normal day</button>
+    </div>
+    <div class="dbrow" id="fsdev">
+      <div class="dev" data-d="mcb"><div class="lever"></div>MCB<small>16 A · C</small></div>
+      <div class="dev" data-d="rccb"><div class="lever"></div>RCCB<small>30 mA</small></div>
+      <div class="dev" data-d="fuse"><div class="lever"></div>Kit-kat fuse<small>old houses</small></div>
+    </div>
+    <p id="fsout" class="muted">Pick a fault above.</p>
+  </div>
+  <div class="tscroll"><table>
+    <thead><tr><th>Device</th><th>Full name</th><th>What it watches</th><th>What it protects</th><th>In your house</th></tr></thead>
+    <tbody>
+      <tr><td><b>MCB</b></td><td>Miniature Circuit Breaker</td><td>Current above its rating. Thermal strip for slow overload, magnetic coil for instant short circuit.</td><td>The <b>wire</b> (and so the house) from fire.</td><td>One per circuit: 6 A lights, 10 A fans, 16 A sockets, 20 A AC, 32 A kitchen. Curve <b>C</b> is standard; <b>B</b> for pure lighting; <b>D</b> for motors and pumps.</td></tr>
+      <tr><td><b>RCCB</b></td><td>Residual Current Circuit Breaker</td><td>Difference between current going out on live and coming back on neutral. Any difference means leakage to earth.</td><td><b>People</b> from electrocution; also fire from leaking insulation.</td><td>One 2-pole 40 A / <b>30 mA</b> for a single-phase home, or 4-pole 63 A / 30 mA for three-phase. Needs a working earth to be fully useful. Press the <b>TEST</b> button monthly.</td></tr>
+      <tr><td><b>ELCB</b></td><td>Earth Leakage Circuit Breaker</td><td>The original voltage-operated device: it sensed voltage on the earth wire. Obsolete; the name now loosely means RCCB.</td><td>People, but unreliable if the earth wire breaks.</td><td>If an electrician says ELCB, he means RCCB. If the device actually has a wire going to earth, replace it.</td></tr>
+      <tr><td><b>RCBO</b></td><td>Residual Current Breaker with Overcurrent</td><td>MCB + RCCB in one body.</td><td>Both wire and people, per circuit.</td><td>Premium choice: one RCBO per circuit so a leaking geyser trips only the geyser, not the whole house.</td></tr>
+      <tr><td><b>MCCB</b></td><td>Moulded Case Circuit Breaker</td><td>Same as MCB but 100 to 1,600 A, adjustable settings.</td><td>Big cables.</td><td>Building main, lift, hospital or society pump room. Not inside a flat.</td></tr>
+      <tr><td><b>Isolator</b></td><td>Main switch / switch disconnector</td><td>Nothing. It is a plain on-off switch rated for the full load.</td><td>The electrician, by giving a visible break.</td><td>Right after the meter and at the top of the DB. 2-pole (single phase) or 4-pole (three-phase).</td></tr>
+      <tr><td><b>SPD</b></td><td>Surge Protective Device</td><td>Voltage spikes of thousands of volts lasting microseconds (lightning, grid switching).</td><td>Electronics: TV, inverter, computer.</td><td>Type 2 SPD in the DB. Cheap insurance in Gujarat's monsoon.</td></tr>
+      <tr><td><b>Fuse</b></td><td>Rewirable (kit-kat) or HRC fuse</td><td>A thin wire that melts on overcurrent.</td><td>Wire from fire, once.</td><td>Old porcelain kit-kat fuses are still in many 1980s homes. People rewire them with thick copper, defeating them. Replace with MCBs.</td></tr>
+      <tr><td><b>Changeover</b></td><td>Changeover switch / ATS</td><td>Nothing; it selects grid or inverter/generator.</td><td>Linemen on the pole from your generator back-feeding the line.</td><td>Mandatory if you have a generator. Inverters have it built in.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="grid2">
+    <div class="note ok"><b>Reading an MCB label.</b> "C16" means curve C, 16 amperes. "6 kA" is the largest short circuit it can safely interrupt; 6 kA or 10 kA is normal for homes. "SP" single pole breaks live only; "DP" double pole breaks live and neutral and is required for the main and for any wet-area circuit (geyser, washing machine).</div>
+    <div class="note ok"><b>Reading an RCCB label.</b> "40 A" is the current it can carry (it does <i>not</i> trip on overload; that is the MCB's job). "30 mA" is the leakage at which it trips, within 30 milliseconds. "Type AC" for ordinary loads; "Type A" if you have inverter ACs and variable-speed washing machines, which produce pulsating DC that Type AC can miss.</div>
+  </div>
+</div></details>
+<details class="chap" id="c-board"><summary>Inside the distribution board</summary><div class="cb" id="board">
+  
+  
+  <p class="lead">This is a typical single-phase DB for a 3-bedroom home, drawn as the electrician sees it. Tap any device to read what it does and how it is wired. Green lever = ON.</p>
+  <div class="db" id="dbdiag">
+    <div class="busl">INCOMING from meter · 6 mm² red (L) + 6 mm² black (N) + 6 mm² green (E from earth pit)</div>
+    <div class="dbrow"><div class="dev wide" data-k="main"><div class="lever"></div>MAIN DP MCB<small>63 A · C · 2P</small></div><div class="dev wide" data-k="rccb"><div class="lever"></div>RCCB<small>63 A · 30 mA · 2P</small></div><div class="dev" data-k="spd"><div class="lever"></div>SPD<small>Type 2</small></div></div>
+    <div class="busl">LIVE BUSBAR (red comb) — every MCB below takes its live from here</div><div class="busbar"></div>
+    <div class="dbrow">
+      <div class="dev" data-k="l1"><div class="lever"></div>Lights 1<small>6 A · 1.5 mm²</small></div>
+      <div class="dev" data-k="l2"><div class="lever"></div>Lights 2<small>6 A · 1.5 mm²</small></div>
+      <div class="dev" data-k="fan"><div class="lever"></div>Fans<small>10 A · 1.5 mm²</small></div>
+      <div class="dev" data-k="s1"><div class="lever"></div>Sockets 1<small>16 A · 2.5 mm²</small></div>
+      <div class="dev" data-k="s2"><div class="lever"></div>Sockets 2<small>16 A · 2.5 mm²</small></div>
+      <div class="dev" data-k="kit"><div class="lever"></div>Kitchen<small>20 A · 4 mm²</small></div>
+      <div class="dev" data-k="gey"><div class="lever"></div>Geyser<small>20 A DP · 4 mm²</small></div>
+      <div class="dev" data-k="ac1"><div class="lever"></div>AC 1<small>20 A DP · 4 mm²</small></div>
+      <div class="dev" data-k="ac2"><div class="lever"></div>AC 2<small>20 A DP · 4 mm²</small></div>
+      <div class="dev" data-k="spare"><div class="lever"></div>Spare<small>—</small></div>
+    </div>
+    <div class="busl">NEUTRAL BAR (black wires return here)</div><div class="busbar n"></div>
+    <div class="busl">EARTH BAR (green wires; bonded to the DB body and the earth pit)</div><div class="busbar e"></div>
+  </div>
+  <div class="card" id="dbinfo"><h3>Tap a device</h3><p class="muted">The order of current is: meter → main DP MCB → RCCB → live busbar → individual MCB → red wire to the room → appliance → black wire back → neutral bar → meter → MGVCL. The green wire never carries current unless something is wrong.</p></div>
+  <div class="grid2">
+    <div class="card"><h4>Why this order?</h4><ol class="tight"><li><b>Main MCB first</b> so the whole board can be killed with one lever, and so the RCCB itself is protected against short circuit.</li><li><b>RCCB second</b>, watching everything downstream. One leak anywhere trips the house. (RCBOs per circuit avoid that.)</li><li><b>Circuit MCBs last</b>, one per group of outlets, so a fault in the kitchen does not darken the bedrooms.</li></ol></div>
+    <div class="card"><h4>Sizing rules an electrician uses</h4><ul class="tight"><li>Wire carrying capacity: 1.5 mm² ≈ 16 A, 2.5 mm² ≈ 22 A, 4 mm² ≈ 30 A, 6 mm² ≈ 38 A (copper, in conduit). The MCB is always rated <b>below</b> the wire.</li><li>Max 800 W per lighting circuit (about 10 points); max 3 kW per socket circuit (about 2 to 3 16 A sockets).</li><li>Every AC, geyser, oven and washing machine gets its own circuit on a DP MCB.</li><li>Leave 20 % spare ways in the DB; the next renovation will thank you.</li></ul></div>
+  </div>
+</div></details>
+<details class="chap" id="c-mdb"><summary>MDB and SDB: dividing a bigger house</summary><div class="cb" id="mdb">
+  
+  
+  <p class="lead">A flat has one board. A bungalow, a two-floor house or a clinic has a <b>Main Distribution Board</b> (MDB) near the meter and a <b>Sub-Distribution Board</b> (SDB) per floor or zone. The tree gets one more level, and in a three-phase home each SDB's circuits are spread across R, Y and B so no phase carries the whole house.</p>
+  <div class="grid2">
+    <div class="card">
+      <span class="eyebrow">The hierarchy</span>
+      <svg viewBox="0 0 440 300" width="100%" role="img" aria-label="MDB feeding three SDBs feeding final circuits">
+        <rect x="150" y="10" width="140" height="44" rx="4" fill="var(--fg)"/><text x="220" y="37" text-anchor="middle" class="lbl" style="fill:var(--bg)">MDB · 4-pole 100 A</text>
+        <path d="M220 54 V80 M80 80 H360 M80 80 V110 M220 80 V110 M360 80 V110" stroke="currentColor" stroke-width="2" fill="none"/>
+        <rect x="20" y="110" width="120" height="40" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><text x="80" y="128" text-anchor="middle" class="lbl">SDB-GF</text><text x="80" y="143" text-anchor="middle">ground floor · 3Ø</text>
+        <rect x="160" y="110" width="120" height="40" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><text x="220" y="128" text-anchor="middle" class="lbl">SDB-FF</text><text x="220" y="143" text-anchor="middle">first floor · 3Ø</text>
+        <rect x="300" y="110" width="120" height="40" rx="4" fill="none" stroke="var(--good)" stroke-width="2"/><text x="360" y="128" text-anchor="middle" class="lbl">SDB-UPS</text><text x="360" y="143" text-anchor="middle">essential · 1Ø</text>
+        <path d="M80 150 V175 M220 150 V175 M360 150 V175" stroke="currentColor" stroke-width="2"/>
+        <path d="M40 175 H120 M40 175 V200 M80 175 V200 M120 175 V200" stroke="#e10600" stroke-width="3" fill="none"/>
+        <path d="M180 175 H260 M180 175 V200 M220 175 V200 M260 175 V200" stroke="#ffd500" stroke-width="3" fill="none"/>
+        <path d="M320 175 H400 M320 175 V200 M360 175 V200 M400 175 V200" stroke="#0a8f2c" stroke-width="3" fill="none"/>
+        <text x="80" y="220" text-anchor="middle">final circuits (R·Y·B mixed)</text><text x="220" y="220" text-anchor="middle">final circuits (R·Y·B mixed)</text><text x="360" y="220" text-anchor="middle">lights · fans · UPS sockets</text>
+        <text x="20" y="260" class="lbl">Feeder cable MDB→SDB: 10–16 mm² 4-core + earth, on its own 4-pole MCB at the MDB</text>
+        <text x="20" y="282">Each SDB has its own isolator, RCCB (or RCBOs) and earth bar bonded back to the MDB.</text>
+      </svg>
+    </div>
+    <div class="card">
+      <h3>Rules at each level</h3>
+      <ul class="tight">
+        <li><b>MDB</b>: 4-pole isolator or MCCB after the three-phase meter, SPD, one 4-pole MCB per outgoing SDB feeder. No final circuits here except the pump and lift.</li>
+        <li><b>SDB</b>: a zone board. Its outgoing single-phase circuits take live from R, Y or B busbars in turn. Each circuit keeps <b>its own neutral</b> back to the SDB neutral bar.</li>
+        <li><b>Never share a neutral</b> between circuits on different RCBOs or different phases. Two phases sharing a neutral can put 415 V across an appliance if that neutral breaks, and RCBOs trip at random.</li>
+        <li><b>Label</b> every board: MDB-01, SDB-GF, SDB-FF, SDB-UPS. The Passport uses these names.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="card">
+    <span class="eyebrow">Phase balancing tool · assign each circuit to a phase</span>
+    <p class="muted">An unbalanced house is the hidden reason "the lights dim when the AC starts". Aim for all three phases within about 20 % of each other.</p>
+    <div class="tscroll"><table id="pbtab"><thead><tr><th>Circuit</th><th>Load</th><th>Phase</th></tr></thead><tbody></tbody></table></div>
+    <div class="grid3" id="pbout"></div>
+    <p id="pbverdict"></p>
+  </div>
+</div></details>
+<details class="chap" id="c-ups"><summary>Inverter and UPS: a second, smaller tree</summary><div class="cb" id="ups">
+  
+  
+  <p class="lead">An inverter does not "add power to the house". It feeds its own separate board, the <b>Essential SDB</b>, and only the circuits wired from that board stay on when MGVCL goes off. Choosing those circuits is the whole design.</p>
+  <div class="grid2">
+    <div class="card">
+      <svg viewBox="0 0 440 250" width="100%" role="img" aria-label="Grid feeds normal SDB and inverter; inverter feeds essential SDB">
+        <rect x="10" y="20" width="110" height="40" rx="4" fill="var(--fg)"/><text x="65" y="45" text-anchor="middle" class="lbl" style="fill:var(--bg)">METER · MDB</text>
+        <path d="M120 40 H170 V30 H230" stroke="#e10600" stroke-width="4" fill="none"/><path d="M170 40 V140 H230" stroke="#e10600" stroke-width="4" fill="none"/>
+        <rect x="230" y="10" width="110" height="40" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><text x="285" y="35" text-anchor="middle" class="lbl">NORMAL SDB</text>
+        <text x="350" y="24">ACs, geysers,</text><text x="350" y="38">induction, pump</text>
+        <rect x="230" y="120" width="110" height="40" rx="4" fill="none" stroke="var(--good)" stroke-width="2"/><text x="285" y="145" text-anchor="middle" class="lbl">INVERTER</text>
+        <text x="350" y="134">battery + auto</text><text x="350" y="148">changeover inside</text>
+        <path d="M285 160 V190" stroke="#0a8f2c" stroke-width="4"/>
+        <rect x="200" y="190" width="170" height="40" rx="4" fill="none" stroke="var(--good)" stroke-width="2"/><text x="285" y="215" text-anchor="middle" class="lbl">ESSENTIAL SDB · SDB-UPS</text>
+        <text x="10" y="200">lights · fans · fridge</text><text x="10" y="216">Wi-Fi · CCTV · UPS</text><text x="10" y="232">sockets (red plates)</text>
+        <path d="M110 212 H200" stroke="#0a8f2c" stroke-width="2" stroke-dasharray="4 4"/>
+      </svg>
+      <ul class="tight">
+        <li>The inverter's <b>input</b> is a circuit from the normal board (16 A MCB). Its <b>output</b> goes only to SDB-UPS, which has its own RCCB or RCBOs.</li>
+        <li>UPS sockets get <b>red face plates</b> so nobody plugs an iron or geyser into the battery.</li>
+        <li>A UPS-fed phase returns on a UPS neutral, back to SDB-UPS. Never borrow a normal-circuit neutral for a UPS point; the RCCBs on both sides will trip, and the inverter can back-feed a "dead" wire.</li>
+        <li>In a three-phase home the single-phase inverter sits on <b>one</b> phase (its input) and feeds SDB-UPS alone. It does not merge R, Y and B.</li>
+        <li>Earth stays common to the whole building. Whether the inverter bonds neutral to earth in backup mode depends on its design; follow the manual, never add a link yourself.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="eyebrow">Choose what to back up · size the inverter</span>
+      <div id="upslist" style="display:grid;gap:4px"></div>
+      <div class="row" style="gap:28px;margin-top:6px"><div><div class="muted">Running load</div><div class="big" id="upsw">0 W</div></div><div><div class="muted">Inverter</div><div class="big" id="upsva">—</div></div><div><div class="muted">Battery for 4 h</div><div class="big" id="upsah">—</div></div></div>
+      <p class="muted" id="upsnote">Tick the loads. Inverter VA = watts ÷ 0.8 with 25 % headroom; battery Ah at 12 V for four hours at 85 % efficiency.</p>
+    </div>
+  </div>
+</div></details>
+</div>
+</div>
+<div class="spanel" hidden>
+<span class="eyebrow">Stage 6 of 7 · RED · BLACK · GREEN</span>
+<h2>Wires inside the wall</h2>
+<p class="lead">From the MCB a red wire carries live to the room, a black wire brings the current back, and a green wire waits for a fault. The wire is sized so the MCB trips before the wire heats.</p>
+<span class="eyebrow">Open for detail</span>
+<div class="chaps">
+<details class="chap" id="c-colours"><summary>Wire colours, exactly</summary><div class="cb" id="colours">
+  
+  
+  <p class="lead">Two colour systems live side by side in every Indian home. Fixed wiring inside the walls uses the Indian (BIS) code. The flexible cord on the appliance you plug in uses the international (IEC 60446) code. Both are correct; an electrician must know both.</p>
+  <h3>Inside the walls · Indian fixed wiring (IS 732)</h3>
+  <div class="wires">
+    <div class="wire"><div class="sw" style="background:var(--w-red)"></div><div class="tx"><b>Red</b><small>R phase · Live</small><span class="hex">RAL 3020 · #E10600</span></div></div>
+    <div class="wire"><div class="sw" style="background:var(--w-yellow)"></div><div class="tx"><b>Yellow</b><small>Y phase (three-phase only)</small><span class="hex">RAL 1021 · #FFD500</span></div></div>
+    <div class="wire"><div class="sw" style="background:var(--w-blue)"></div><div class="tx"><b>Blue</b><small>B phase (three-phase only)</small><span class="hex">RAL 5017 · #0047BB</span></div></div>
+    <div class="wire"><div class="sw" style="background:var(--w-black)"></div><div class="tx"><b>Black</b><small>Neutral</small><span class="hex">RAL 9005 · #111111</span></div></div>
+    <div class="wire"><div class="sw" style="background:var(--w-green)"></div><div class="tx"><b>Green</b><small>Earth (or green-yellow)</small><span class="hex">RAL 6018 · #0A8F2C</span></div></div>
+  </div>
+  <h3>On the appliance cord · IEC code (also used in new commercial work)</h3>
+  <div class="wires">
+    <div class="wire"><div class="sw" style="background:var(--w-brown)"></div><div class="tx"><b>Brown</b><small>Live (L1)</small><span class="hex">RAL 8003 · #6B3A1E</span></div></div>
+    <div class="wire"><div class="sw" style="background:var(--w-black)"></div><div class="tx"><b>Black</b><small>L2 in three-phase cords</small><span class="hex">#111111</span></div></div>
+    <div class="wire"><div class="sw" style="background:var(--w-grey)"></div><div class="tx"><b>Grey</b><small>L3 in three-phase cords</small><span class="hex">RAL 7001 · #8E8E8E</span></div></div>
+    <div class="wire"><div class="sw" style="background:var(--w-lblue)"></div><div class="tx"><b>Light blue</b><small>Neutral</small><span class="hex">RAL 5012 · #5AA9FF</span></div></div>
+    <div class="wire"><div class="sw gy"></div><div class="tx"><b>Green-yellow stripe</b><small>Earth (protective)</small><span class="hex">#0A8F2C / #FFD500</span></div></div>
+  </div>
+  <div class="note danger"><b>The classic trap.</b> In the wall, <b>black = neutral</b>. In a three-phase appliance cord, <b>black = a live phase</b>. And in the wall, <b>blue = B phase (live)</b>, while in a cord <b>light blue = neutral</b>. Never assume by colour alone across the two systems. A tester or multimeter is the final word.</div>
+  <div class="grid2">
+    <div class="card"><h4>Other colours you will meet</h4><ul class="tight"><li><b>White or grey</b> in old 1980s wiring: often neutral, sometimes a switched live. Test it.</li><li><b>Red with a tape marker</b>: a switched live coming back from a switch to the fan or light (electricians call it the "return" or "switch wire").</li><li><b>Two reds in a 2-way staircase switch</b>: the "strappers" between the two switches.</li><li><b>Yellow sleeve on a red</b>: some electricians mark the Y phase this way when only red wire is on the roll. Discourage it.</li></ul></div>
+    <div class="card"><h4>Buying wire · what the print on the cable means</h4><ul class="tight"><li><span class="mono">1.5 sq mm FR</span>: cross-section 1.5 mm², flame retardant. Lights and fans.</li><li><span class="mono">2.5 sq mm FRLS</span>: flame retardant, low smoke. 6 A and 16 A sockets.</li><li><span class="mono">4 / 6 sq mm</span>: AC, geyser, kitchen 16 A points; 6 mm² for the main.</li><li><span class="mono">1100 V grade</span>: insulation rated for 1,100 V; standard for house wiring.</li><li><span class="mono">ISI mark + IS 694</span>: the BIS standard. Insist on it. Copper only; aluminium is false economy indoors.</li></ul></div>
+  </div>
+</div></details>
+<details class="chap" id="c-faults"><summary>The quiet faults that actually burn houses</summary><div class="cb" id="faults">
+  
+  
+  <p class="lead">Short circuits are loud and get caught by the MCB in milliseconds. The faults that start fires and kill appliances are slow, hidden, and look fine on the day the house is handed over.</p>
+  <div class="grid3">
+    <div class="card"><span class="pill bad">heat</span><h4>Loose terminal</h4><p>A screw not tightened, or aluminium wire that has crept. The joint gains a few hundredths of an ohm of resistance. Power lost there is I²R: current squared times resistance. At 20 A, 0.05 Ω wastes 20 W <b>inside a plastic socket</b>, all day. The plastic browns, then chars. No MCB sees it, because the current is normal.</p></div>
+    <div class="card"><span class="pill bad">415 V</span><h4>Broken neutral</h4><p>On three-phase, a corroded neutral lug at the pole or the meter lets each phase's voltage wander. The lightly loaded floor sees 300 to 400 V and every TV, inverter and fridge board dies at once. The only defence is a tight, tested neutral and an over/under-voltage relay in the MDB.</p></div>
+    <div class="card"><span class="pill warn">trips</span><h4>Mixed neutrals</h4><p>Two circuits on two RCBOs sharing one neutral. Each RCBO sees current leaving on its live that returns on the other's neutral: an imbalance. Random trips, usually blamed on "a faulty RCCB". The fix is one neutral per circuit, back to the board.</p></div>
+    <div class="card"><span class="pill warn">dark</span><h4>One phase lost</h4><p>A feeder fuse at the DT blows for Y phase. Bedrooms on Y go dark, the hall on R works. Residents report "half the house has no light". Before calling MGVCL, check the three phase indicator lamps on the MDB; if only one is dark, it is the supply.</p></div>
+    <div class="card"><span class="pill bad">hidden</span><h4>Joints inside conduit or plaster</h4><p>A wire that was 30 cm short, twisted and taped inside the pipe. Every such joint is a loose terminal with no screw at all. Joints belong only in junction boxes you can open. Photographs before plaster are the only way to know where they are.</p></div>
+    <div class="card"><span class="pill warn">guess</span><h4>Unlabelled board</h4><p>The electrician must switch off "something" to work on a socket. He guesses, works on a live wire, or kills the fridge and the Wi-Fi for an hour. A documentation fault that behaves like a wiring fault. The Passport fixes it.</p></div>
+  </div>
+  <div class="card">
+    <span class="eyebrow">I²R heater · how much heat a bad joint makes</span>
+    <div class="grid2">
+      <label class="f">Current through the joint: <span class="mono" id="jrI">16</span> A<input type="range" id="jrIr" min="1" max="40" value="16"></label>
+      <label class="f">Contact resistance: <span class="mono" id="jrR">0.05</span> Ω<input type="range" id="jrRr" min="1" max="50" value="5"></label>
+    </div>
+    <div class="row" style="gap:28px"><div><div class="muted">Heat at the joint</div><div class="big" id="jrW">12.8 W</div></div><div><div class="muted">Compare</div><div class="big" id="jrC">a night-lamp, on, inside the wall</div></div></div>
+  </div>
+</div></details>
+</div>
+</div>
+<div class="spanel" hidden>
+<span class="eyebrow">Stage 7 of 7 · SOCKET · SWITCH</span>
+<h2>The point in the room</h2>
+<p class="lead">At the point, the switch always breaks the red wire. In a 3-pin socket, earth is on top, live on the right and neutral on the left.</p>
+<span class="eyebrow">Open for detail</span>
+<div class="chaps">
+<details class="chap" id="c-rooms"><summary>Wiring a room, point by point</summary><div class="cb" id="rooms">
+  
+  
+  <p class="lead">Pick a room to see its circuits, then look at how a switch, a fan and a socket are actually connected.</p>
+  <div class="rooms" id="roombtns"></div>
+  <div class="card" id="roomout"></div>
+  <div class="grid2">
+    <div class="card">
+      <span class="eyebrow">The one rule of switches</span>
+      <h3>A switch always breaks the red wire</h3>
+      <p>Live (red) comes from the DB to the switch. From the switch a second red (the "return") goes to the bulb. Neutral (black) goes straight from the DB to the bulb, never through the switch. When the switch is off, the bulb holder has no pressure on it. If an electrician puts the switch on the black wire, the bulb goes off but the holder stays live, and you get a shock changing a bulb.</p>
+      <svg viewBox="0 0 440 180" width="100%" role="img" aria-label="Light switch wiring: live through switch, neutral direct">
+        <rect x="8" y="20" width="60" height="140" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><text x="14" y="38" class="lbl">DB</text>
+        <text x="14" y="70">L</text><text x="14" y="130">N</text>
+        <rect x="170" y="48" width="70" height="40" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><text x="180" y="73" class="lbl">switch</text>
+        <circle cx="380" cy="100" r="26" fill="none" stroke="currentColor" stroke-width="2"/><text x="365" y="105" class="lbl">bulb</text>
+        <path d="M68 66 H170" stroke="#e10600" stroke-width="5" fill="none"/>
+        <path d="M240 66 H300 V86 H356" stroke="#e10600" stroke-width="5" fill="none"/>
+        <path d="M68 126 H300 V114 H356" stroke="#111111" stroke-width="5" fill="none"/>
+        <text x="90" y="58">red · live</text><text x="248" y="58">red · return</text><text x="120" y="146">black · neutral (never switched)</text>
+      </svg>
+    </div>
+    <div class="card">
+      <span class="eyebrow">Look at a 3-pin socket from the front</span>
+      <h3>Earth on top, live on the right</h3>
+      <p>Indian 6 A and 16 A sockets (type D and M plugs): the large pin at the top is <b>earth</b>, the bottom-right hole is <b>live</b>, bottom-left is <b>neutral</b>. The earth pin is longer so it connects first and breaks last. A 16 A socket must be on 2.5 mm² wire minimum.</p>
+      <svg class="sock" viewBox="0 0 200 200" width="100%" role="img" aria-label="Socket face: earth top, neutral left, live right">
+        <rect x="10" y="10" width="180" height="180" rx="14" fill="var(--panel2)" stroke="currentColor" stroke-width="2"/>
+        <rect x="88" y="40" width="24" height="34" rx="6" fill="#0a8f2c"/><text x="76" y="92" class="lbl">E</text>
+        <rect x="46" y="110" width="20" height="32" rx="5" fill="#111111"/><text x="50" y="160" class="lbl">N</text>
+        <rect x="134" y="110" width="20" height="32" rx="5" fill="#e10600"/><text x="140" y="160" class="lbl">L</text>
+        <text x="60" y="185">left N · right L · top E</text>
+      </svg>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="card"><h4>Ceiling fan with regulator</h4><p>Red from the switch goes to the <b>regulator</b>, regulator output goes to the fan's live, fan's other wire (usually black or blue from the factory) goes to neutral. The capacitor inside the fan is on the fan's own two wires; never cut it out. A fan point is 1.5 mm² on the 10 A fan MCB.</p></div>
+    <div class="card"><h4>Two-way switch (staircase, bedroom door + bedside)</h4><p>Both switches are special 2-way switches with three terminals. Live goes to the common of switch 1, the two reds ("strappers") join the L1/L2 of both switches, and the common of switch 2 goes to the light. Either switch toggles the light. A common mistake is using ordinary 1-way switches; it looks the same but one switch then becomes a master.</p></div>
+    <div class="card"><h4>Geyser and AC points</h4><p>Each on its own circuit, on a <b>double-pole</b> MCB so both live and neutral are cut, with a 16 A or 20 A socket or a direct DP switch at the point. 4 mm² for anything above 2 kW or longer than 20 m. The earth wire must reach the geyser body; a geyser without earth plus a weak RCCB is the classic bathroom fatality.</p></div>
+    <div class="card"><h4>Looping and junction boxes</h4><p>Neutral and earth are "looped": one wire runs point to point, joined only inside switchboards and metal junction boxes, never inside the conduit. A joint hidden in a wall is a fault waiting for a monsoon. Every conduit has a <b>fish wire</b> left in for future pulling.</p></div>
+  </div>
+</div></details>
+<details class="chap" id="c-earthing"><summary>Earthing: the wire that saves lives</summary><div class="cb" id="earthing">
+  
+  
+  <p class="lead">The green wire does nothing on a normal day. On the day a geyser element cracks and its metal body goes live, it carries the fault into the ground so hard that the RCCB and MCB trip before anyone touches the tap.</p>
+  <div class="grid2">
+    <div class="card"><h3>How an earth pit is built (IS 3043)</h3><ol class="tight"><li>A pit about 2 to 3 m deep near the house, in moist soil, away from the septic tank.</li><li>An electrode: a 2.5 m galvanised pipe or a 600 × 600 mm copper plate, or a modern <b>chemical earthing</b> rod with a bentonite / conductive backfill.</li><li>Layers of charcoal and salt (old method) or the chemical compound to keep the soil conductive.</li><li>A 6 or 8 mm² green copper wire (or 25 × 3 mm GI strip) from the electrode to the DB's earth bar, with a test link in a small chamber on top.</li><li>Measured with an earth tester. Target: <b>below 1 Ω</b> for a hospital or clinic; below 5 Ω is the practical minimum for a home.</li></ol></div>
+    <div class="card"><h3>Mistakes that make earthing useless</h3><ul class="tight"><li>Earth wire connected to the neutral bar "because neutral is also earthed". This defeats the RCCB.</li><li>Earth wire tied to a water pipe. Plastic pipes have replaced metal; there is no path.</li><li>Pit dried out in summer; nobody has watered it in years. Chemical earthing exists to avoid this.</li><li>Top earth pin on the socket left unconnected to save wire. Test every socket with a plug tester.</li><li>Two separate earths for the inverter and the house at different potentials.</li></ul></div>
+  </div>
+  <div class="note"><b>The three-second test every owner can do.</b> Buy a ₹300 socket tester. Plug it into every 3-pin socket. Three lamps light in the "correct" pattern only if live, neutral and earth are all on the right pins. Then press the TEST button on the RCCB once a month; it must trip instantly. If it does not, the RCCB is dead and your house is protected only against fire, not against shock.</div>
+</div></details>
+</div>
+</div>
+    <div class="row pnav"><button type="button" id="prevS">‹ Previous stage</button><button type="button" id="nextS">Next stage ›</button></div>
+  </div>
+  <details class="chap" id="c-basics"><summary>New to this? Four words you need: volt, ampere, watt, unit</summary><div class="cb" id="basics">
+  
+  
+  <p class="lead">Think of electricity as water in a pipe. That one picture carries you through everything else.</p>
+  <div class="grid2">
+    <div class="card"><span class="eyebrow">Volt (V) · pressure</span><h3>How hard the push is</h3><p>Voltage is the pressure in the pipe. Your home is supplied at a nominal <b>230 V</b> (older books say 240 V). The 11,000 V on the street pole is the same water at 48 times the pressure. Pressure is what gives you a shock; it does not need to flow much to hurt you.</p></div>
+    <div class="card"><span class="eyebrow">Ampere (A) · flow</span><h3>How much is flowing</h3><p>Current is litres per second. A 9 W LED bulb draws about 0.04 A; a 1.5-ton air-conditioner draws 6 to 8 A; a 2 kW geyser draws nearly 9 A. Wires, switches and MCBs are all rated in amperes because <b>flow is what heats a wire</b>.</p></div>
+    <div class="card"><span class="eyebrow">Watt (W) · power</span><h3>Pressure × flow</h3><p>Power = Volt × Ampere. 230 V × 8.7 A ≈ 2,000 W = 2 kW. This is the number printed on every appliance. 1,000 W is 1 kW. Your <b>sanctioned load</b> on the MGVCL bill is in kW.</p></div>
+    <div class="card"><span class="eyebrow">Unit (kWh) · energy</span><h3>Power × time, what you pay for</h3><p>One unit = 1 kW running for 1 hour. The 2 kW geyser on for 30 minutes = 1 unit. The meter counts units; MGVCL bills you per unit in slabs.</p></div>
+  </div>
+  <div class="card">
+    <span class="eyebrow">Try it · from watts to amperes</span>
+    <div class="grid2">
+      <label class="f">Appliance power (watts)<input type="number" id="pw" value="1500" min="1" step="50"></label>
+      <label class="f">Voltage<select id="pv"><option value="230">230 V single-phase</option><option value="415">415 V three-phase (balanced)</option></select></label>
+    </div>
+    <div class="row" style="gap:28px"><div><div class="muted">Current</div><div class="big" id="pa">6.5 A</div></div><div><div class="muted">Minimum wire</div><div class="big" id="pwire">2.5 mm²</div></div><div><div class="muted">MCB</div><div class="big" id="pmcb">16 A</div></div></div>
+    <p class="muted" id="pnote">Wire size and MCB are chosen so the wire can carry the current without heating, and the MCB trips before the wire does.</p>
+  </div>
+  <div class="grid3">
+    <div class="card flat"><h4>AC, not DC</h4><p>Mains electricity alternates direction 50 times a second (50 Hz). That is why a transformer can step it up and down, and why "live" and "neutral" are not plus and minus.</p></div>
+    <div class="card flat"><h4>Live / Phase</h4><p>The wire that carries the pressure. Touch it while standing on the ground and current flows through you. Every switch must break <b>this</b> wire.</p></div>
+    <div class="card flat"><h4>Neutral</h4><p>The return path. It is tied to earth at the transformer, so it sits near 0 V. It still carries the full current of the circuit; never treat it as safe.</p></div>
+    <div class="card flat"><h4>Earth</h4><p>A third wire that normally carries nothing. It connects the metal body of your fridge or geyser to the ground, so a fault goes into the earth instead of through you.</p></div>
+  </div>
+</div></details>
+</div>
+
+<div class="view" id="view-chapters" hidden>
+<section class="step">
+  <h2>All chapters</h2>
+  <p class="lead">Everything from the earlier version, listed under the stage it now belongs to. Tap one to open it in the flow.</p>
+  <div class="grid2">
+<div class="card"><span class="eyebrow">Before the flow</span><h3>Basics</h3><div class="clist"><button type="button" class="cl" data-stage="-1" data-ch="c-basics">Four words you need: volt, ampere, watt, unit</button></div></div>
+<div class="card"><span class="eyebrow">Stage 1 · 66 kV → 11 kV</span><h3>Substation</h3><div class="clist"><button type="button" class="cl" data-stage="0" data-ch="c-j0">Generation and transmission (GETCO)</button><button type="button" class="cl" data-stage="0" data-ch="c-j1">Grid substation, 220/66 kV</button><button type="button" class="cl" data-stage="0" data-ch="c-j2">MGVCL substation, 66/11 kV (your "sub-station")</button></div></div>
+<div class="card"><span class="eyebrow">Stage 2 · 11 kV → 433 V</span><h3>Transformer</h3><div class="clist"><button type="button" class="cl" data-stage="1" data-ch="c-j3">Distribution transformer (DT) on the pole or plinth</button></div></div>
+<div class="card"><span class="eyebrow">Stage 3 · 415 V · 3Ø + N</span><h3>Street line</h3><div class="clist"><button type="button" class="cl" data-stage="2" data-ch="c-j4">LT line (low tension) along the street</button><button type="button" class="cl" data-stage="2" data-ch="c-phases">Single phase vs three phase</button></div></div>
+<div class="card"><span class="eyebrow">Stage 4 · 230 V · 1Ø + N</span><h3>Meter</h3><div class="clist"><button type="button" class="cl" data-stage="3" data-ch="c-j5">Service connection to your house</button><button type="button" class="cl" data-stage="3" data-ch="c-j6">Energy meter (increasingly a smart prepaid meter)</button><button type="button" class="cl" data-stage="3" data-ch="c-meter">Smart meters: when the bill goes up</button></div></div>
+<div class="card"><span class="eyebrow">Stage 5 · MAIN · RCCB · MCB</span><h3>Board</h3><div class="clist"><button type="button" class="cl" data-stage="4" data-ch="c-j7">Your side begins: main isolator and distribution board</button><button type="button" class="cl" data-stage="4" data-ch="c-protection">MCB, RCCB, ELCB, RCBO, MCCB: who protects whom</button><button type="button" class="cl" data-stage="4" data-ch="c-board">Inside the distribution board</button><button type="button" class="cl" data-stage="4" data-ch="c-mdb">MDB and SDB: dividing a bigger house</button><button type="button" class="cl" data-stage="4" data-ch="c-ups">Inverter and UPS: a second, smaller tree</button></div></div>
+<div class="card"><span class="eyebrow">Stage 6 · RED · BLACK · GREEN</span><h3>Wall</h3><div class="clist"><button type="button" class="cl" data-stage="5" data-ch="c-colours">Wire colours, exactly</button><button type="button" class="cl" data-stage="5" data-ch="c-faults">The quiet faults that actually burn houses</button></div></div>
+<div class="card"><span class="eyebrow">Stage 7 · SOCKET · SWITCH</span><h3>Room</h3><div class="clist"><button type="button" class="cl" data-stage="6" data-ch="c-rooms">Wiring a room, point by point</button><button type="button" class="cl" data-stage="6" data-ch="c-earthing">Earthing: the wire that saves lives</button></div></div>
+  </div>
+</section>
+</div>
+
+<div class="view" id="view-passport" hidden>
+<section class="step" id="qr">
+  
+  <h2>The Electrical Passport: a QR code on every meter box</h2>
+  <p class="lead">A house is wired once and then opened by a dozen different electricians over forty years. Nobody remembers which MCB feeds the guest-room AC, where the earth pit is, or that the kitchen was moved to the B phase in 2019. The knowledge lives in one man's head, and he moves away.</p>
+  <div class="grid3">
+    <div class="card flat"><h4>Faults at 11 pm</h4><p>The RCCB trips. Which circuit is leaking? With a circuit map you switch MCBs off one by one in two minutes. Without it you call someone in the morning.</p></div>
+    <div class="card flat"><h4>Renovation</h4><p>The contractor wants to drill a wall. The schema shows the conduit routes and the depth. Nails through cables stop being a lottery.</p></div>
+    <div class="card flat"><h4>Emergencies</h4><p>Fire brigade, a tenant, a neighbour: anyone with a phone can find the main switch and the gas line isolation in seconds.</p></div>
+    <div class="card flat"><h4>Resale and insurance</h4><p>A dated, tested wiring record with earth resistance readings raises buyer confidence and answers the insurer's first question after a fire.</p></div>
+    <div class="card flat"><h4>Medical and clinics</h4><p>For a hospital, the map marks which sockets are on the UPS / inverter circuit, so an OT or NICU equipment is never plugged into a raw line.</p></div>
+    <div class="card flat"><h4>Cost: a sticker</h4><p>A laminated QR on the DB door and another on the meter box. The schema itself is a PDF or a web page; the QR is just the pointer. Update the page, keep the sticker.</p></div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h3>What belongs in the passport</h3>
+      <ul class="tight">
+        <li>Single-line diagram: meter → MDB → SDBs → final circuits, with phase of each.</li>
+        <li>DB schedule: every MCB/RCBO number, rating, curve, wire size, what it serves.</li>
+        <li>Floor map with a <b>point ID</b> on every switch, socket, fan and AC.</li>
+        <li>Conduit routes and photos taken <b>before plaster and false ceiling</b>.</li>
+        <li>Earth pit location, electrode type, resistance reading and date.</li>
+        <li>UPS map: which board, which sockets, inverter rating.</li>
+        <li>Test sheet at commissioning: insulation (MΩ), polarity, RCCB trip time, earth continuity.</li>
+        <li>Change log: every later modification, by whom, when.</li>
+      </ul>
+      <p class="muted">Core idea: the wiring belongs to the building, so the record stays with the building, not with the electrician.</p>
+    </div>
+    <div class="card">
+      <h3>Point IDs: make the hidden system searchable</h3>
+      <p>Every outlet gets a short code written inside the switchboard cover and in the schema. Room, type, number.</p>
+      <div class="grid3">
+        <label class="f">Room<select id="pidR"><option value="HL">HL · Hall</option><option value="BR1">BR1 · Bedroom 1</option><option value="BR2" selected>BR2 · Bedroom 2</option><option value="KT">KT · Kitchen</option><option value="BA">BA · Bathroom</option><option value="OT">OT · Operation theatre</option></select></label>
+        <label class="f">Type<select id="pidT"><option value="L">L · Light</option><option value="F">F · Fan</option><option value="S">S · Socket</option><option value="AC" selected>AC · Air conditioner</option><option value="GY">GY · Geyser</option><option value="MW">MW · Microwave / kitchen</option><option value="U">U · UPS socket</option></select></label>
+        <label class="f">Number<input type="number" id="pidN" value="1" min="1" max="99"></label>
+      </div>
+      <div class="row" style="gap:20px"><div class="big mono" id="pidOut">BR2-AC01</div><button id="pidAdd">Add to passport</button></div>
+      <p class="muted">The electrician's workflow on the phone: tap room, tap type, tap the circuit it feeds, photo before closure. The system writes the ID, the DB schedule and the floor map. Nobody draws CAD; installing creates the drawing.</p>
+    </div>
+  </div>
+  <div class="card">
+    <span class="eyebrow">Build your own · the QR encodes exactly this text</span>
+    <div class="grid2">
+      <label class="f">House / flat name<input type="text" id="qh" value="Flat 204, Shanti Residency, Sample Road"></label>
+      <label class="f">Supply<select id="qs"><option>Single phase 230 V, 5 kW sanctioned</option><option>Three phase 415 V, 10 kW sanctioned</option><option>Three phase 415 V, 15 kW sanctioned</option></select></label>
+      <label class="f">MGVCL consumer no. / feeder<input type="text" id="qc" value="Consumer 1234567890 · Feeder: Sample-3 · DT 112"></label>
+      <label class="f">Earth pit location + last reading<input type="text" id="qe" value="North compound wall, near gate · 1.8 Ω on 12-Jan-2026"></label>
+      <label class="f">Main switch location<input type="text" id="qm" value="DB behind kitchen door; meter box at stilt parking"></label>
+      <label class="f">Electrician contact<input type="text" id="qp" value="Ramesh Electricals · 98xxx xxxxx"></label>
+    </div>
+    <label class="f">Circuit map (one per line: MCB → what it feeds)<textarea id="ql" rows="7">1 Lights-1 6A 1.5mm²: hall, dining, passage
+2 Lights-2 6A 1.5mm²: 3 bedrooms, bathrooms
+3 Fans 10A 1.5mm²: all fans
+4 Sockets-1 16A 2.5mm²: hall, dining
+5 Sockets-2 16A 2.5mm²: bedrooms
+6 Kitchen 20A 4mm²: chimney, oven, fridge, mixer
+7 Geyser 20A DP 4mm²: master bath
+8 AC-1 20A DP 4mm²: master bedroom
+9 AC-2 20A DP 4mm²: hall
+RCCB 63A 30mA covers all; SPD Type 2 fitted; tested 12-Jan-2026</textarea></label>
+    <div class="row"><button class="pri" id="qgen">Generate QR</button><button id="qcopy">Copy the text</button><span class="muted" id="qmsg"></span></div>
+    <div class="grid2">
+      <div class="qr-out" id="qrbox"></div>
+      <pre class="mono" id="qtxt" style="white-space:pre-wrap;font-size:12px;background:var(--panel2);padding:12px;border-radius:6px;margin:0;min-width:0"></pre>
+    </div>
+    <p class="muted">For a real house, put the schema on a web page or a Google Drive PDF and encode the <b>link</b> instead of the text, so the sticker never needs reprinting. Add the DB photo with MCBs labelled.</p>
+  </div>
+  <div class="grid2">
+    <div class="card flat"><h4>Start small: a 20-home pilot</h4><p>The question worth testing is whether a competent electrician can document an ordinary home with only 30 to 60 extra minutes of work, if the phone workflow is taps, room icons, voice notes and photos. Output per home: single-line diagram, DB schedule, point IDs, phase allocation, cable sizes, UPS map, earth map, test sheet, pre-plaster photos, a printable passport and a QR.</p></div>
+    <div class="card flat"><h4>Who pays for it</h4><p>Three customers: the owner ("tell me what is inside my walls"), the electrician ("help me work professionally and charge for it"), and the builder ("a premium handover at little extra cost"). Beyond new homes: mapping existing undocumented houses, an electrical audit service (earthing, polarity, RCCB, phase balance), and electrician certification in diagram reading and RCBO/SPD/UPS practice.</p></div>
+  </div>
+</section>
+</div>
+
+<div class="view" id="view-exam" hidden>
+<section class="step" id="exam">
+  
+  <h2>The wireman's exam</h2>
+  <p class="lead">Twelve questions an ITI electrician should get right. Answer all twelve.</p>
+  <div id="quiz" style="display:grid;gap:18px"></div>
+  <div class="card" id="qres" hidden></div>
+  <div class="card">
+    <span class="eyebrow">Professional electrician's checklist for a new home</span>
+    <ul class="tight">
+      <li>Load list per room, phase balancing plan, and the DB schedule <b>on paper before</b> the first conduit is laid.</li>
+      <li>Copper FR/FRLS, ISI-marked, 1100 V grade; 1.5 / 2.5 / 4 / 6 mm² as per the sizing rules in the Board stage; PVC conduit 20 or 25 mm with fish wire.</li>
+      <li>Red live, black neutral, green earth; separate neutral per circuit, no shared neutrals.</li>
+      <li>Main DP MCB → RCCB 30 mA (Type A if inverter appliances) → circuit MCBs; SPD Type 2; DP MCBs for every wet-area and heavy appliance.</li>
+      <li>Earth pit per IS 3043, measured and recorded; earth continuity at every socket checked with a tester.</li>
+      <li>Insulation resistance test (megger, 500 V) of every circuit: above 1 MΩ. Polarity test of every socket. RCCB trip-time test.</li>
+      <li>Each MCB labelled; schema and test readings printed and encoded in the QR on the DB door.</li>
+    </ul>
+  </div>
+</section>
+</div>
+</main>
+
+<footer class="foot">
+  <div class="wirebar" aria-hidden="true"><i style="background:var(--w-red)"></i><i style="background:var(--w-yellow)"></i><i style="background:var(--w-blue)"></i><i style="background:var(--w-black)"></i><i style="background:var(--w-green)"></i></div>
+  <div class="tag">Standard: <b>230 V single-phase · 415 V three-phase · 50 Hz</b> &nbsp;·&nbsp; Codes: IS 732, IS 3043, NEC-India 2023</div>
+</footer>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+(function(){
+  var $=function(s,r){return (r||document).querySelector(s)}, $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+
+  /* ---- basics calculator ---- */
+  function calc(){
+    var p=parseFloat($('#pw').value)||0, v=parseFloat($('#pv').value);
+    var a= v===415 ? p/(Math.sqrt(3)*415) : p/230;
+    var wire,mcb,note;
+    if(a<=10){wire='1.5 mm²';mcb= a<=5?'6 A':'10 A';note='Lighting / fan class circuit.';}
+    else if(a<=16){wire='2.5 mm²';mcb='16 A';note='Socket class circuit. The MCB sits just below the wire capacity.';}
+    else if(a<=22){wire='4 mm²';mcb='20 A DP';note='Heavy appliance: own circuit, double-pole MCB.';}
+    else if(a<=30){wire='6 mm²';mcb='32 A DP';note='Very heavy load; check if sanctioned load allows it.';}
+    else {wire='10 mm² +';mcb='40 A+';note='This belongs on three-phase supply or an MCCB. Not a household circuit.';}
+    $('#pa').textContent=a.toFixed(1)+' A'; $('#pwire').textContent=wire; $('#pmcb').textContent=mcb; $('#pnote').textContent=note;
+  }
+  $('#pw').addEventListener('input',calc); $('#pv').addEventListener('change',calc); calc();
+
+  /* ---- wave canvas ---- */
+  var cv=$('#wave'), cx=cv.getContext('2d'), three=false, t=0, reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function css(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
+  function draw(){
+    var W=cv.width,H=cv.height; cx.clearRect(0,0,W,H);
+    cx.fillStyle=css('--panel'); cx.fillRect(0,0,W,H);
+    cx.strokeStyle=css('--line'); cx.lineWidth=1;
+    cx.beginPath(); cx.moveTo(0,H/2); cx.lineTo(W,H/2); cx.stroke();
+    for(var g=1;g<4;g++){cx.beginPath();cx.moveTo(g*W/4,0);cx.lineTo(g*W/4,H);cx.stroke();}
+    cx.fillStyle=css('--muted'); cx.font='12px '+css('--mono'); cx.fillText('+325 V peak',8,16); cx.fillText('0 V (neutral)',8,H/2-6); cx.fillText('-325 V',8,H-8); cx.fillText('← one cycle = 20 ms (50 Hz) →',W/2-110,H-8);
+    var phases= three? [[css('--w-red'),0,'R'],[css('--w-yellow'),2*Math.PI/3,'Y'],[css('--w-blue'),4*Math.PI/3,'B']] : [[css('--w-red'),0,'R (live)']];
+    phases.forEach(function(ph){
+      cx.strokeStyle=ph[0]; cx.lineWidth=4; cx.beginPath();
+      for(var x=0;x<=W;x+=3){var y=H/2 - Math.sin((x/W)*4*Math.PI - ph[1] + t)*(H*0.38); if(x===0)cx.moveTo(x,y);else cx.lineTo(x,y);}
+      cx.stroke();
+      var xl=W*0.78, yl=H/2 - Math.sin((xl/W)*4*Math.PI - ph[1] + t)*(H*0.38);
+      cx.fillStyle=ph[0]; cx.beginPath(); cx.arc(xl,yl,7,0,7); cx.fill();
+      cx.fillStyle=css('--fg'); cx.font='bold 14px '+css('--display'); cx.fillText(ph[2],xl+12,yl+5);
+    });
+    cx.strokeStyle=css('--w-black'); cx.lineWidth=3; cx.setLineDash([6,6]); cx.beginPath(); cx.moveTo(0,H/2); cx.lineTo(W,H/2); cx.stroke(); cx.setLineDash([]);
+    if(!reduce){t+=0.04; requestAnimationFrame(draw);}
+  }
+  $('#b1ph').onclick=function(){three=false;$('#b1ph').classList.add('on');$('#b3ph').classList.remove('on');if(reduce)draw();};
+  $('#b3ph').onclick=function(){three=true;$('#b3ph').classList.add('on');$('#b1ph').classList.remove('on');if(reduce)draw();};
+  draw();
+
+  /* ---- fault simulator ---- */
+  var fsText={
+    ol:['MCB trips after 10 to 60 seconds (thermal). RCCB stays on: live and neutral currents are equal, nothing is leaking. Old kit-kat fuse melts, if nobody has rewired it with thick copper.',['mcb','fuse']],
+    sc:['MCB trips in under 10 ms (magnetic). The fuse would also blow, with a flash. RCCB does not act on its own, though the bang often trips it too.',['mcb','fuse']],
+    el:['Only the RCCB sees this: 30 mA leaving on live and not returning on neutral. It trips in 30 ms. The MCB (16,000 mA) notices nothing. The fuse notices nothing. A house without an RCCB has no protection here at all.',['rccb']],
+    ok:['Everything stays on. Current goes out on live and comes back on neutral in equal measure, below the MCB rating.',[]]
+  };
+  $$('.fs').forEach(function(b){b.onclick=function(){
+    $$('.fs').forEach(function(x){x.classList.remove('on')}); b.classList.add('on');
+    var d=fsText[b.dataset.f]; $('#fsout').textContent=d[0];
+    $$('#fsdev .dev').forEach(function(x){x.classList.toggle('off',d[1].indexOf(x.dataset.d)>=0)});
+  };});
+
+  /* ---- DB diagram ---- */
+  var dbInfo={
+    main:['Main double-pole MCB, 63 A','Kills the whole house. Live in from the meter on the top terminal, out from the bottom to the RCCB. Neutral the same, in parallel. Rated above the sum of what you will ever draw at once but below the capacity of the 6 mm² incomer (about 38 A continuous; 63 A is the conventional choice for the short-circuit duty, the real limit is the MGVCL cut-out).'],
+    rccb:['RCCB 63 A / 30 mA, double pole','Both live and neutral pass through a ring core. If 30 mA goes missing (into earth, or into a person), the magnetic imbalance throws the latch. Press TEST monthly. If it trips and will not reset, switch every circuit MCB off, reset it, then switch MCBs on one by one; the one that trips it is the leaking circuit.'],
+    spd:['Surge protective device, Type 2','Sits between the live busbar and the earth bar. On a lightning spike it momentarily shorts the surge to earth. The window turns red when it is used up; replace the cartridge.'],
+    l1:['Lights 1 · 6 A SP · 1.5 mm²','Hall, dining and passage lights, about 8 points. Red from this MCB goes to each switchboard; black neutral and green earth loop directly.'],
+    l2:['Lights 2 · 6 A SP · 1.5 mm²','Bedrooms and bathrooms. Lighting is split in two so one fault never leaves the house fully dark.'],
+    fan:['Fans · 10 A SP · 1.5 mm²','All ceiling fans. Fans run through a regulator at the switchboard. 75 W each, so 10 fans draw only 3 A.'],
+    s1:['Sockets 1 · 16 A SP · 2.5 mm²','6 A and 16 A sockets in hall and dining: TV, inverter charging, iron. Earth to every socket.'],
+    s2:['Sockets 2 · 16 A SP · 2.5 mm²','Bedroom sockets: phone chargers, laptop, bedside lamps.'],
+    kit:['Kitchen · 20 A SP · 4 mm²','Fridge, chimney, mixer, microwave, induction. The busiest circuit in a Gujarati home. Many electricians give the induction cooktop its own 20 A.'],
+    gey:['Geyser · 20 A DP · 4 mm²','One per geyser. Double pole, because bathrooms are wet and a tripped MCB must leave the geyser completely dead on both wires. Earth to the geyser body is compulsory.'],
+    ac1:['AC 1 · 20 A DP · 4 mm²','Master bedroom split AC, 1.5 ton ≈ 7 A running, 20 A starting. Inverter ACs need a Type A RCCB upstream.'],
+    ac2:['AC 2 · 20 A DP · 4 mm²','Hall AC. On a three-phase home this would sit on a different phase from AC 1 to balance.'],
+    spare:['Spare way','Always leave one or two. The next AC, an EV charger (which wants 32 A DP on 6 mm²), or a pump goes here without rebuilding the board.']
+  };
+  $$('#dbdiag .dev').forEach(function(d){d.onclick=function(){
+    $$('#dbdiag .dev').forEach(function(x){x.classList.remove('sel')}); d.classList.add('sel');
+    var i=dbInfo[d.dataset.k]; $('#dbinfo').innerHTML='<h3></h3><p></p>'; $('#dbinfo h3').textContent=i[0]; $('#dbinfo p').textContent=i[1];
+  };});
+
+  /* ---- rooms ---- */
+  var rooms={
+    'Master bedroom':[['#e10600','Light points ×3','Lights-2 MCB 6 A · 1.5 mm² · 2-way at door + bedside'],['#e10600','Fan ×1','Fans MCB 10 A · 1.5 mm² · regulator at switchboard'],['#e10600','6 A sockets ×4','Sockets-2 MCB 16 A · 2.5 mm² · bedside both sides, TV, dressing'],['#e10600','AC point','AC-1 MCB 20 A DP · 4 mm² · 16 A socket or DP switch at 2.1 m'],['#111111','Neutral loop','black 1.5 / 2.5 mm² looped at switchboards only'],['#0a8f2c','Earth loop','green to every socket and AC point']],
+    'Hall / living':[['#e10600','Light points ×5 + chandelier','Lights-1 MCB 6 A · 1.5 mm²'],['#e10600','Fans ×2','Fans MCB 10 A'],['#e10600','TV unit: 6 A ×3 + 16 A ×1','Sockets-1 MCB 16 A · 2.5 mm² · Wi-Fi, set-top box, soundbar'],['#e10600','AC point','AC-2 MCB 20 A DP · 4 mm²'],['#e10600','Inverter / UPS line','Separate wiring loop on inverter output for 4 lights, 2 fans, Wi-Fi'],['#0a8f2c','Earth loop','green to every socket']],
+    'Kitchen':[['#e10600','Light + under-cabinet LED','Lights-1 MCB 6 A'],['#e10600','Exhaust fan + chimney','Fans MCB 10 A'],['#e10600','16 A sockets ×4','Kitchen MCB 20 A · 4 mm² · fridge, microwave, mixer, induction'],['#e10600','Water purifier 6 A','Kitchen MCB, earth essential'],['#0a8f2c','Earth loop','green, bonded to steel sink if metal plumbing']],
+    'Bathroom':[['#e10600','Light + mirror light','Lights-2 MCB 6 A · fitting IP44 or higher'],['#e10600','Exhaust fan','Fans MCB 10 A'],['#e10600','Geyser','Geyser MCB 20 A DP · 4 mm² · DP switch outside the bathroom, 2 m from shower'],['#0a8f2c','Earth to geyser body','green 2.5 mm² · never skipped']],
+    'Clinic / OT room':[['#e10600','General lights','Lights MCB 6 A'],['#e10600','UPS sockets (red face plates)','Dedicated RCBO 16 A per 2 sockets · fed from online UPS · marked on schema'],['#e10600','Raw-mains sockets (white)','Sockets MCB 16 A'],['#e10600','AC','20 A DP each'],['#0a8f2c','Equipotential earth bar','Separate medical earth below 1 Ω, all metal equipment bonded']]
+  };
+  var rb=$('#roombtns'), ro=$('#roomout');
+  Object.keys(rooms).forEach(function(k,i){var b=document.createElement('button');b.textContent=k;if(i===0)b.classList.add('on');b.onclick=function(){$$('button',rb).forEach(function(x){x.classList.remove('on')});b.classList.add('on');showRoom(k);};rb.appendChild(b);});
+  function showRoom(k){ro.innerHTML='<h3></h3>'; ro.querySelector('h3').textContent=k;
+    rooms[k].forEach(function(c){var d=document.createElement('div');d.className='circ';var sw=document.createElement('i');sw.className='cw';sw.style.background=c[0];var t=document.createElement('div');var b=document.createElement('b');b.textContent=c[1];var s=document.createElement('small');s.textContent=c[2];t.appendChild(b);t.appendChild(s);d.appendChild(sw);d.appendChild(t);ro.appendChild(d);});}
+  showRoom('Master bedroom');
+
+  /* ---- QR ---- */
+  var qr=null;
+  function qtext(){return 'WIRING SCHEMA · '+$('#qh').value+'\nSupply: '+$('#qs').value+'\n'+$('#qc').value+'\nEarth: '+$('#qe').value+'\nMain switch: '+$('#qm').value+'\nElectrician: '+$('#qp').value+'\n\nCIRCUITS\n'+$('#ql').value;}
+  function gen(){var t=qtext(); $('#qtxt').textContent=t; var box=$('#qrbox'); box.innerHTML='';
+    try{ qr=new QRCode(box,{text:t,width:220,height:220,correctLevel:QRCode.CorrectLevel.L}); $('#qmsg').textContent=t.length+' characters encoded'; }
+    catch(e){ box.textContent='Text too long for one QR (keep under ~1,200 characters) or the QR library did not load.'; }
+  }
+  $('#qgen').onclick=gen;
+  $('#qcopy').onclick=function(){var t=qtext(); if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(function(){$('#qmsg').textContent='Copied.'},function(){sel();});}else sel();
+    function sel(){var r=document.createRange();r.selectNodeContents($('#qtxt'));var s=getSelection();s.removeAllRanges();s.addRange(r);$('#qmsg').textContent='Text selected; press copy.';}};
+  gen();
+
+  /* ---- quiz ---- */
+  var Q=[
+    ['In Indian fixed house wiring, the black wire is:',['Live','Neutral','Earth','Y phase'],1,'Black is neutral inside the walls. On an appliance cord, black can be a live phase; that is the trap.'],
+    ['Which device protects a person who touches a live tap?',['MCB','Fuse','RCCB','Isolator'],2,'Only the RCCB detects the 30 mA that leaks through a body. An MCB needs thousands of mA.'],
+    ['A switch must be connected in the:',['Neutral wire','Earth wire','Live (red) wire','Either live or neutral'],2,'Breaking the live leaves the fitting dead. Breaking the neutral leaves the holder live.'],
+    ['Phase-to-phase voltage on a three-phase supply is:',['230 V','415 V','11 kV','460 V'],1,'230 × √3 ≈ 400 to 415 V.'],
+    ['A 2 kW geyser on 230 V draws about:',['2 A','4.5 A','8.7 A','20 A'],2,'2000 ÷ 230 ≈ 8.7 A, hence a 16 or 20 A DP MCB on 4 mm².'],
+    ['On a 3-pin Indian socket viewed from the front, the live hole is:',['Top','Bottom left','Bottom right','Any side'],2,'Earth top, neutral left, live right.'],
+    ['The letter C in "C16" on an MCB means:',['Copper','Current','Trip curve C','Class C insulation'],2,'Curve C trips magnetically at 5 to 10 times rated current; standard for homes.'],
+    ['The DT outside your lane steps voltage from:',['66 kV to 11 kV','11 kV to 433 V','415 V to 230 V','220 kV to 66 kV'],1,'The distribution transformer is the 11 kV to 433 V step. 66/11 kV happens at the MGVCL substation.'],
+    ['A broken neutral on a three-phase home causes:',['Nothing','Only a tripped MCB','Voltages up to 415 V on single-phase appliances','Lower bills'],2,'Neutral float. Lightly loaded phases rise, burning appliances.'],
+    ['What does the TEST button on an RCCB do?',['Measures earth resistance','Creates a deliberate small leakage to check it trips','Resets the device','Checks the MCBs'],1,'It passes a small current around the sensing core. If it does not trip, replace it.'],
+    ['Two circuits on two different RCBOs share one neutral wire. Result:',['Saves copper, no problem','Random RCBO tripping and an unsafe return path','Lower voltage drop','Better phase balance'],1,'Each RCBO sees current leaving on its live and returning on the other\'s neutral. One neutral per circuit, always.'],
+    ['A loose screw at a 16 A socket adds 0.05 Ω. The heat produced is about:',['0.05 W','0.8 W','12.8 W','230 W'],2,'I²R = 16 × 16 × 0.05 = 12.8 W, continuously, inside plastic. No MCB notices.']
+  ];
+  var ans=new Array(Q.length).fill(null), qz=$('#quiz');
+  Q.forEach(function(q,i){var d=document.createElement('div');d.className='q';var h=document.createElement('h4');h.textContent=(i+1)+'. '+q[0];d.appendChild(h);var o=document.createElement('div');o.className='opts';
+    q[1].forEach(function(opt,j){var b=document.createElement('button');b.textContent=opt;b.onclick=function(){if(ans[i]!==null)return;ans[i]=j;b.classList.add(j===q[2]?'right':'wrong');if(j!==q[2])o.children[q[2]].classList.add('right');var e=document.createElement('p');e.className='muted';e.textContent=q[3];d.appendChild(e);score();};o.appendChild(b);});
+    d.appendChild(o);qz.appendChild(d);});
+  function score(){var done=ans.filter(function(a){return a!==null}).length; if(done<Q.length)return; var s=ans.filter(function(a,i){return a===Q[i][2]}).length; var r=$('#qres'); r.hidden=false;
+    var v= s===Q.length?'Licensed wireman. You can supervise your own electrician.': s>=8?'Apprentice. Re-read the Board and Wall stages and you are there.':'Helper. Walk through the board diagram again and retake.';
+    r.innerHTML='<span class="eyebrow">Result</span><div class="big"></div><p></p>'; r.querySelector('.big').textContent=s+' / '+Q.length; r.querySelector('p').textContent=v; r.scrollIntoView({behavior:'smooth',block:'center'});}
+
+
+  /* ---- phase balancing ---- */
+  var pbC=[['Hall lights + fans',0.6,'R'],['Bedroom lights + fans',0.6,'Y'],['Hall sockets',1.0,'R'],['Bedroom sockets',0.8,'Y'],['Kitchen',2.5,'B'],['Geyser 1',2.0,'R'],['Geyser 2',2.0,'Y'],['AC 1 (hall)',1.6,'B'],['AC 2 (master)',1.6,'R'],['AC 3 (bedroom 2)',1.6,'Y'],['Washing machine',1.5,'B'],['Pump 1 HP',0.9,'B']];
+  var pbB=$('#pbtab tbody');
+  pbC.forEach(function(c,i){var tr=document.createElement('tr');var t1=document.createElement('td');t1.textContent=c[0];var t2=document.createElement('td');t2.className='mono';t2.textContent=c[1].toFixed(1)+' kW';var t3=document.createElement('td');var sel=document.createElement('select');sel.id='pb'+i;['R','Y','B'].forEach(function(p){var o=document.createElement('option');o.value=p;o.textContent=p+' phase';if(p===c[2])o.selected=true;sel.appendChild(o);});sel.onchange=pbCalc;t3.appendChild(sel);tr.appendChild(t1);tr.appendChild(t2);tr.appendChild(t3);pbB.appendChild(tr);});
+  function pbCalc(){var tot={R:0,Y:0,B:0};pbC.forEach(function(c,i){tot[$('#pb'+i).value]+=c[1];});var col={R:'var(--w-red)',Y:'var(--w-yellow)',B:'var(--w-blue)'};var out=$('#pbout');out.innerHTML='';var vals=[];
+    ['R','Y','B'].forEach(function(p){vals.push(tot[p]);var d=document.createElement('div');d.className='card flat';d.style.borderTop='6px solid '+col[p];d.innerHTML='<div class="muted"></div><div class="big"></div><div class="mono"></div>';d.querySelector('.muted').textContent=p+' phase';d.querySelector('.big').textContent=tot[p].toFixed(1)+' kW';d.querySelector('.mono').textContent=(tot[p]*1000/230).toFixed(1)+' A';out.appendChild(d);});
+    var mx=Math.max.apply(null,vals),mn=Math.min.apply(null,vals),imb=mx?((mx-mn)/mx*100):0;var v=$('#pbverdict');
+    v.innerHTML='<span class="pill"></span> ';v.querySelector('.pill').className='pill '+(imb<=20?'good':imb<=40?'warn':'bad');v.querySelector('.pill').textContent='imbalance '+imb.toFixed(0)+' %';
+    v.appendChild(document.createTextNode(imb<=20?' Well balanced. The neutral carries only '+(Math.abs(mx-mn)*1000/230).toFixed(1)+' A of difference.':imb<=40?' Acceptable but move one heavy load off the busiest phase.':' Badly unbalanced. One phase will sag and heat while another idles; the neutral carries '+((mx-mn)*1000/230).toFixed(1)+' A.'));}
+  pbCalc();
+
+  /* ---- UPS sizing ---- */
+  var upsL=[['4 LED lights',40,true],['2 ceiling fans',150,true],['Wi-Fi router + fibre box',20,true],['Refrigerator (running)',150,true],['TV + set-top box',120,false],['Laptop + phone charging',90,true],['CCTV + DVR',40,false],['Water purifier',30,false],['1 split AC 1.5 ton',1500,false],['Microwave',1200,false],['Geyser 2 kW',2000,false],['Induction cooktop',1800,false]];
+  var ul=$('#upslist');
+  upsL.forEach(function(l,i){var lab=document.createElement('label');lab.style.display='flex';lab.style.gap='8px';lab.style.alignItems='center';var cb=document.createElement('input');cb.type='checkbox';cb.id='ups'+i;cb.checked=l[2];cb.onchange=upsCalc;var sp=document.createElement('span');sp.textContent=l[0];var m=document.createElement('span');m.className='mono muted';m.style.marginLeft='auto';m.textContent=l[1]+' W';lab.appendChild(cb);lab.appendChild(sp);lab.appendChild(m);ul.appendChild(lab);});
+  function upsCalc(){var w=0;upsL.forEach(function(l,i){if($('#ups'+i).checked)w+=l[1];});var va=w/0.8*1.25;var sizes=[600,850,1100,1500,2000,2500,3500,5000,7500,10000];var pick=sizes.filter(function(s){return s>=va})[0];var ah=w*4/12/0.85;
+    $('#upsw').textContent=w+' W';$('#upsva').textContent=pick?pick+' VA':'>10 kVA';$('#upsah').textContent=Math.ceil(ah/10)*10+' Ah';
+    $('#upsnote').textContent= w>2500?'This is no longer a home inverter. ACs, geysers and induction belong on the normal board; back them up only with a large hybrid system or a generator.': w>1200?'A 24 V or 48 V system with two to four batteries. Keep heavy heating loads off it.':'A single 12 V battery system covers this. This is the classic Essential SDB: lights, fans, fridge, Wi-Fi.';}
+  upsCalc();
+
+  /* ---- I²R ---- */
+  function jr(){var I=+$('#jrIr').value,R=+$('#jrRr').value/100,W=I*I*R;$('#jrI').textContent=I;$('#jrR').textContent=R.toFixed(2);$('#jrW').textContent=W.toFixed(1)+' W';
+    $('#jrC').textContent= W<2?'barely warm':W<8?'a phone charger, warm to touch':W<25?'a night-lamp, on, inside the wall':W<60?'a soldering iron behind the switch plate':'a small heater; the plastic chars within days';}
+  $('#jrIr').addEventListener('input',jr);$('#jrRr').addEventListener('input',jr);jr();
+
+  /* ---- meter test ---- */
+  function mt(){var W=+$('#mtW').value||0,M=+$('#mtM').value||0,K=+$('#mtK').value||0;var e=W*M/60/1000;$('#mtE').textContent=e.toFixed(3)+' kWh';var err=e?((K-e)/e*100):0;$('#mtErr').textContent=(err>=0?'+':'')+err.toFixed(1)+' %';var v=$('#mtV');var a=Math.abs(err);v.className='pill '+(a<=2?'good':a<=5?'warn':'bad');v.textContent=a<=2?'within Class 1 tolerance':a<=5?'borderline; repeat with a longer run':'outside tolerance; raise a complaint with the readings';}
+  ['mtW','mtM','mtK'].forEach(function(id){$('#'+id).addEventListener('input',mt);});mt();
+
+  /* ---- point IDs ---- */
+  function pid(){var n=('0'+(+$('#pidN').value||1)).slice(-2);var id=$('#pidR').value+'-'+$('#pidT').value+n;$('#pidOut').textContent=id;return id;}
+  ['pidR','pidT','pidN'].forEach(function(id){$('#'+id).addEventListener('input',pid);$('#'+id).addEventListener('change',pid);});pid();
+  $('#pidAdd').onclick=function(){var id=pid();var rt=$('#pidR').selectedOptions[0].textContent.split('· ')[1],tt=$('#pidT').selectedOptions[0].textContent.split('· ')[1];var ta=$('#ql');ta.value+='\nPOINT '+id+': '+rt+' '+tt.toLowerCase();$('#pidN').value=(+$('#pidN').value||1)+1;pid();gen();$('#qmsg').textContent='Added '+id+' to the circuit map.';};
+
+  })();
+</script>
+<script>
+/* ---------- flow: appliance, fault, stages, views ---------- */
+(function(){
+  var $=function(s,r){return (r||document).querySelector(s)}, $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+
+  var APPS=[
+    {id:'led',label:'LED bulb',w:9,wt:'9 W',mcb:'Lights MCB · 6 A',wire:'1.5 mm²'},
+    {id:'fan',label:'Ceiling fan',w:75,wt:'75 W',mcb:'Fans MCB · 10 A',wire:'1.5 mm²'},
+    {id:'iron',label:'Iron',w:1000,wt:'1,000 W',mcb:'Sockets MCB · 16 A',wire:'2.5 mm²'},
+    {id:'ac',label:'AC 1.5 ton',w:1600,wt:'1,600 W',mcb:'own MCB · 20 A DP',wire:'4 mm²'},
+    {id:'gey',label:'Geyser',w:2000,wt:'2,000 W',mcb:'own MCB · 20 A DP',wire:'4 mm²'}
+  ];
+  var FLTS=[
+    {id:'none',label:'Normal day',tripAt:0,faultAt:0},
+    {id:'ol',label:'Overload',tripAt:5,faultAt:6,trip:'MCB trips, 10–60 s',where:'wire heating',
+     text:'Geyser, AC and iron share one 16 A line. The current creeps above what the wire can carry. The thermal strip in the MCB warms and trips in 10 to 60 seconds, before the insulation softens. The RCCB stays on: nothing is leaking.'},
+    {id:'sc',label:'Short circuit',tripAt:5,faultAt:6,trip:'MCB trips, under 10 ms',where:'nail through cable',
+     text:'A nail goes through a cable and live touches neutral. Current jumps to hundreds of amperes. The magnetic coil in the MCB trips in under 10 ms.'},
+    {id:'el',label:'Earth leakage',tripAt:5,faultAt:7,trip:'RCCB trips, 30 ms',where:'current through a hand',
+     text:'A wet hand touches a live tap. Current leaves on red and does not all return on black. The RCCB sees the 30 mA difference and trips in 30 ms. The 16 A MCB notices nothing.'}
+  ];
+
+  var st={app:'gey',flt:'none',stage:-1};
+  var stages=$$('.stage'), panel=$('#panel'), slot=$('#pslot'), spanels=$$('.spanel',panel);
+  var wide=matchMedia('(min-width:1000px)'), calm=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function fmt(a){ if(a>=1) return a.toFixed(1); if(a>=0.01) return a.toFixed(2); return String(+a.toPrecision(1)); }
+  function byId(list,id){ return list.filter(function(x){return x.id===id;})[0]; }
+
+  function chips(box,list,key){
+    list.forEach(function(o){
+      var b=document.createElement('button'); b.type='button'; b.dataset.id=o.id;
+      b.textContent=o.label;
+      b.onclick=function(){ st[key]=o.id; render(); };
+      box.appendChild(b);
+    });
+  }
+  chips($('#apps'),APPS,'app'); chips($('#flts'),FLTS,'flt');
+
+  function mark(sel,id){ $$(sel+' button').forEach(function(b){ var on=b.dataset.id===id; b.classList.toggle('on',on); b.setAttribute('aria-pressed',on?'true':'false'); }); }
+
+  function render(){
+    var a=byId(APPS,st.app), f=byId(FLTS,st.flt), tripped=f.id!=='none';
+    var i230=a.w/230, i11=a.w/11000;
+    mark('#apps',a.id); mark('#flts',f.id);
+    $('#rdWall').textContent=(tripped?'0':fmt(i230))+' A';
+    $('#rdFeed').textContent=(tripped?'0':fmt(i11))+' A';
+    $('#rdSum').textContent= tripped ? f.text :
+      a.label+' ('+a.wt+') draws '+fmt(i230)+' A at 230 V in your wall, but only '+fmt(i11)+' A on the 11 kV feeder. Same power at 48 times the pressure needs one forty-eighth of the flow. That is why the street runs at high voltage.';
+    var units=String(+(a.w/1000).toFixed(3)); units+= units==='1' ? ' unit' : ' units';
+    var vals= tripped
+      ? ['live, no current','live, no current','live, no current','meter stops counting',a.mcb,a.wire+' copper',a.label+' · '+a.wt]
+      : [fmt(i11)+' A on the 11 kV feeder',fmt(i11)+' A in, '+fmt(i230)+' A out',fmt(i230)+' A on one phase',units+' every hour',a.mcb,a.wire+' copper',a.label+' · '+a.wt];
+    var thick=Math.round(3+Math.sqrt(i230)*5.5);
+    stages.forEach(function(el,i){
+      var n=i+1, t= n===1?3:thick, c='var(--w-red)', cls='live', txt='live';
+      if(tripped){
+        t=3;
+        if(n===f.tripAt){ cls='trip'; txt=f.trip; }
+        if(n>f.tripAt){ c='var(--w-grey)'; if(n===f.faultAt){ cls='where'; txt=f.where; } else { cls='dead'; txt='dead'; } }
+      }
+      el.style.setProperty('--t',t+'px'); el.style.setProperty('--c',c);
+      $('.sval',el).textContent=vals[i];
+      var p=$('.pill',el); p.className='pill '+cls; p.textContent=txt;
+    });
+  }
+
+  function place(){
+    if(st.stage<0){ panel.hidden=true; return; }
+    panel.hidden=false;
+    if(wide.matches){ if(panel.parentNode!==slot) slot.appendChild(panel); }
+    else { var s=stages[st.stage]; if(s.nextElementSibling!==panel) s.after(panel); }
+  }
+  function go(el){ el.scrollIntoView({block:'start',behavior:calm?'auto':'smooth'}); }
+
+  function select(i,toggle){
+    st.stage=(toggle&&st.stage===i)?-1:i;
+    stages.forEach(function(el,k){ el.setAttribute('aria-expanded',k===st.stage?'true':'false'); });
+    spanels.forEach(function(p,k){ p.hidden=k!==st.stage; });
+    $('#prevS').disabled=st.stage<=0; $('#nextS').disabled=st.stage>=stages.length-1;
+    place();
+    if(st.stage<0) return;
+    if(wide.matches){
+      var pr=panel.getBoundingClientRect();
+      if(pr.top>innerHeight-220||pr.top<0) go($('#flowtop'));
+    } else {
+      var r=stages[st.stage].getBoundingClientRect();
+      if(r.top<56||r.top>innerHeight*0.55) go(stages[st.stage]);
+    }
+  }
+  stages.forEach(function(el,i){ el.onclick=function(){ select(i,true); }; });
+  $('#prevS').onclick=function(){ if(st.stage>0) select(st.stage-1,false); };
+  $('#nextS').onclick=function(){ if(st.stage<stages.length-1) select(st.stage+1,false); };
+  if(wide.addEventListener) wide.addEventListener('change',place); else if(wide.addListener) wide.addListener(place);
+
+  /* a close button at the foot of every chapter */
+  $$('details.chap').forEach(function(d){
+    var row=document.createElement('div'); row.className='row';
+    var b=document.createElement('button'); b.type='button'; b.textContent='Close this chapter';
+    b.onclick=function(){ d.open=false; d.scrollIntoView({block:'nearest'}); };
+    row.appendChild(b); $('.cb',d).appendChild(row);
+  });
+
+  /* views and the address hash */
+  var views={flow:$('#view-flow'),chapters:$('#view-chapters'),passport:$('#view-passport'),exam:$('#view-exam')}, links=$$('nav.tabs a');
+  var CH={basics:-1,phases:2,meter:3,protection:4,board:4,mdb:4,ups:4,colours:5,faults:5,rooms:6,earthing:6};
+  function show(v){
+    Object.keys(views).forEach(function(k){ views[k].hidden=k!==v; });
+    links.forEach(function(a){ var on=a.getAttribute('href')==='#'+v; a.classList.toggle('on',on); if(on) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current'); });
+  }
+  function top(){ var h=$('.hero'), y=h.offsetTop+h.offsetHeight; if(scrollY>y) scrollTo(0,y); }
+  function route(user){
+    var h=(location.hash||'').replace('#','');
+    if(h==='qr') h='passport';
+    if(h==='passport'||h==='exam'||h==='chapters'){ show(h); if(user) top(); return; }
+    show('flow');
+    if(Object.prototype.hasOwnProperty.call(CH,h)){
+      if(CH[h]>=0&&st.stage!==CH[h]) select(CH[h],false);
+      var el=document.getElementById(h), d=el&&el.closest('details');
+      if(d){ d.open=true; setTimeout(function(){ d.scrollIntoView({block:'start'}); },80); }
+      return;
+    }
+    if(user) top();
+  }
+  function openChap(i,id){
+    show('flow');
+    if(i>=0&&st.stage!==i) select(i,false);
+    var d=document.getElementById(id);
+    if(d){ d.open=true; setTimeout(function(){ d.scrollIntoView({block:'start'}); },80); }
+  }
+  $$('#view-chapters .cl').forEach(function(b){ b.onclick=function(){ openChap(+b.dataset.stage,b.dataset.ch); }; });
+  links.forEach(function(a){ a.addEventListener('click',function(){ show(a.getAttribute('href').slice(1)); top(); }); });
+  addEventListener('hashchange',function(){ route(true); });
+
+  render(); route(false);
+})();
+</script>
+</body>
+</html>
